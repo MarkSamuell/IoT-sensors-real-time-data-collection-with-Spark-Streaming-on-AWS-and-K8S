@@ -1,0 +1,58 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[remote "origin"]
+	url = https://vxlabs-org@dev.azure.com/vxlabs-org/Uraeus/_git/Uraeus%20DataPlatform
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "URAEUS-1627-data-user-start-to-see-se-vs-and-logs-related-to-api-connect"]
+	remote = origin
+	merge = refs/heads/URAEUS-1627-data-user-start-to-see-se-vs-and-logs-related-to-api-connect
+	vscode-merge-base = origin/URAEUS-1627-data-user-start-to-see-se-vs-and-logs-related-to-api-connect
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+	vscode-merge-base = origin/main
+[branch "Job_Management_API_POC"]
+	remote = origin
+	merge = refs/heads/Job_Management_API_POC
+	vscode-merge-base = origin/Job_Management_API_POC
+[branch "URAEUS-746-data-aggregations-and-validation-checks-assure-consistency"]
+	remote = origin
+	merge = refs/heads/URAEUS-746-data-aggregations-and-validation-checks-assure-consistency
+	vscode-merge-base = origin/URAEUS-746-data-aggregations-and-validation-checks-assure-consistency
+[branch "Detection_engine_API_POC"]
+	remote = origin
+	merge = refs/heads/Detection_engine_API_POC
+	vscode-merge-base = origin/Detection_engine_API_POC
+[branch "Native_Cluster_Deployment_to_EKS"]
+	remote = origin
+	merge = refs/heads/Native_Cluster_Deployment_to_EKS
+	vscode-merge-base = origin/Native_Cluster_Deployment_to_EKS
+[branch "merge-native-eks"]
+	vscode-merge-base = origin/main
+	remote = origin
+	merge = refs/heads/merge-native-eks
+[branch "stg"]
+	vscode-merge-base = origin/main
+	remote = origin
+	merge = refs/heads/stg
+[branch "dev"]
+	vscode-merge-base = origin/stg
+	remote = origin
+	merge = refs/heads/dev
+[branch "Dynamic_Mapping_of_Spark_Jobs"]
+	remote = origin
+	merge = refs/heads/Dynamic_Mapping_of_Spark_Jobs
+	vscode-merge-base = origin/Dynamic_Mapping_of_Spark_Jobs
+[branch "AI_integration_with_EQL_Detector"]
+	remote = origin
+	merge = refs/heads/AI_integration_with_EQL_Detector
+	vscode-merge-base = origin/AI_integration_with_EQL_Detector
+[branch "API_Connect_UI_Implementation"]
+	remote = origin
+	merge = refs/heads/API_Connect_UI_Implementation
+	vscode-merge-base = origin/API_Connect_UI_Implementation

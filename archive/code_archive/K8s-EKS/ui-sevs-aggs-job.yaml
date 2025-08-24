@@ -1,0 +1,98 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: ui-sevs-aggs
+  namespace: spark-jobs
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: "703671895821.dkr.ecr.eu-central-1.amazonaws.com/fleetconnect-dataplatform:spark-k8s"
+  imagePullPolicy: Always
+  mainApplicationFile: "local:///opt/spark/work-dir/spark_runner.py"
+  arguments:
+    - "ui_sevs_aggs"
+  sparkVersion: "3.5.1"
+  restartPolicy:
+    type: OnFailure
+    onFailureRetries: 3
+    onFailureRetryInterval: 10
+    onSubmissionFailureRetries: 5
+    onSubmissionFailureRetryInterval: 20
+  driver:
+    cores: 1
+    memory: "1G"
+    serviceAccount: spark-sa
+    tolerations:
+      - key: node-type
+        operator: Equal
+        value: "spark"
+        effect: NoSchedule
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: node-type
+                  operator: In
+                  values:
+                    - spark
+    env:
+      - name: PYTHONPATH
+        value: "/opt/spark/work-dir:/opt/spark/work-dir/src"
+      - name: HOME
+        value: "/tmp"
+      - name: HTTP2_DISABLE
+        value: "true"
+      - name: KUBERNETES_TLS_VERSIONS
+        value: "TLSv1.2,TLSv1.3"
+      - name: AWS_REGION
+        value: "eu-central-1"
+    volumeMounts:
+      - name: config-volume
+        mountPath: "/opt/spark/work-dir/configs"
+  executor:
+    cores: 1
+    instances: 1
+    memory: "1G"
+    tolerations:
+      - key: node-type
+        operator: Equal
+        value: "spark"
+        effect: NoSchedule
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: node-type
+                  operator: In
+                  values:
+                    - spark
+    env:
+      - name: PYTHONPATH
+        value: "/opt/spark/work-dir:/opt/spark/work-dir/src"
+      - name: HOME
+        value: "/tmp"
+      - name: HTTP2_DISABLE
+        value: "true"
+      - name: KUBERNETES_TLS_VERSIONS
+        value: "TLSv1.2,TLSv1.3"
+      - name: AWS_REGION
+        value: "eu-central-1"
+    volumeMounts:
+      - name: config-volume
+        mountPath: "/opt/spark/work-dir/configs"
+  volumes:
+    - name: config-volume
+      configMap:
+        name: spark-configs
+  sparkConf:
+    "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem"
+    "spark.hadoop.fs.s3a.endpoint": "s3.eu-central-1.amazonaws.com"
+    "spark.hadoop.fs.s3a.aws.credentials.provider": "com.amazonaws.auth.WebIdentityTokenCredentialsProvider"
+    "spark.hadoop.fs.s3a.path.style.access": "false"
+    "spark.driver.extraJavaOptions": "-Divy.home=/tmp/.ivy2 -Dokhttp.protocols=TLSv1.2 -Dhttp2.disable=true"
+    "spark.executor.extraJavaOptions": "-Divy.home=/tmp/.ivy2 -Dokhttp.protocols=TLSv1.2 -Dhttp2.disable=true"
+    "spark.kubernetes.submission.connectionTimeout": "60000"
+    "spark.kubernetes.submission.requestTimeout": "60000"

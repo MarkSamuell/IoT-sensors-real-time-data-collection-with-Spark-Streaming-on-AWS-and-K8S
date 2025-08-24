@@ -1,0 +1,22 @@
+0000000000000000000000000000000000000000 d0e99088372e21892f7133b2b51ac59d151ec855 mark gigris <mark.girgis@vxlabs.de> 1744113910 +0200	branch: Created from origin/Job_Management_API_POC
+d0e99088372e21892f7133b2b51ac59d151ec855 56ed679da1dc262d7748c28813d3a1cd1951eb29 mark gigris <mark.girgis@vxlabs.de> 1744121707 +0200	commit: initiate job management UI
+56ed679da1dc262d7748c28813d3a1cd1951eb29 fa269b840505ff11ed7e2c6782fa75b29b19a502 mark gigris <mark.girgis@vxlabs.de> 1744194987 +0200	commit: service started to submit EMR successfully
+fa269b840505ff11ed7e2c6782fa75b29b19a502 b493705c70d8faf3676405a2f624b5bc4ab40184 mark gigris <mark.girgis@vxlabs.de> 1744280557 +0200	commit: (Updated UI in Uraeus style) -
+b493705c70d8faf3676405a2f624b5bc4ab40184 8b49f4fe4331386a3af2c67f973178d4f57e53dc mark gigris <mark.girgis@vxlabs.de> 1744288254 +0200	commit: Add job counts and running jobs API endpoints; update UI to display job statistics
+8b49f4fe4331386a3af2c67f973178d4f57e53dc 6f14c90a5f132afb8391652e12808cbd328effa7 mark gigris <mark.girgis@vxlabs.de> 1744292683 +0200	commit: all_jobs_view added
+6f14c90a5f132afb8391652e12808cbd328effa7 7fdd8f983cdc66fd24d8edfadaf7501fbc1177f7 mark gigris <mark.girgis@vxlabs.de> 1744294641 +0200	commit: Enhance job submission UI and add step details API
+7fdd8f983cdc66fd24d8edfadaf7501fbc1177f7 be14640fa250513cd7245ffc0886eb0630d0d846 mark gigris <mark.girgis@vxlabs.de> 1744542517 +0200	commit: add job details template with driver logs and job configs
+be14640fa250513cd7245ffc0886eb0630d0d846 2906ad55fd1e3fda6b41bd0f8422f721c22b86b2 mark gigris <mark.girgis@vxlabs.de> 1744545834 +0200	commit: Add Trino query tool functionality and UI integration
+2906ad55fd1e3fda6b41bd0f8422f721c22b86b2 d17d6963d5096cdb403f03c8a3dde93e47c502a9 mark gigris <mark.girgis@vxlabs.de> 1744556639 +0200	commit: Refactor Trino service and query tool integration
+d17d6963d5096cdb403f03c8a3dde93e47c502a9 892cd00e4508f150c720add125c6704545fb3c75 mark gigris <mark.girgis@vxlabs.de> 1744558601 +0200	commit: trying to add visulizer to query data
+892cd00e4508f150c720add125c6704545fb3c75 a5d02c8daed5049ef8e8b56f75191e643041d04a mark gigris <mark.girgis@vxlabs.de> 1744575148 +0200	commit: Add query visualization feature with React component but not working
+a5d02c8daed5049ef8e8b56f75191e643041d04a e8343f9095c58f30b54e6bbd403f9db1710cec05 mark gigris <mark.girgis@vxlabs.de> 1744576952 +0200	commit: Enhance query execution and visualization features with robust error handling and type conversion
+e8343f9095c58f30b54e6bbd403f9db1710cec05 d17d6963d5096cdb403f03c8a3dde93e47c502a9 mark gigris <mark.girgis@vxlabs.de> 1744620231 +0200	reset: moving to d17d6963d5096cdb403f03c8a3dde93e47c502a9
+d17d6963d5096cdb403f03c8a3dde93e47c502a9 f09c5def46115d805f907db5cf54ac436e8726a4 mark gigris <mark.girgis@vxlabs.de> 1744620446 +0200	commit: Add Trino column retrieval API and enhance query visualization features
+f09c5def46115d805f907db5cf54ac436e8726a4 f3ef13dfb2078ed581e4fa6ff2a920a13a5d39c3 mark gigris <mark.girgis@vxlabs.de> 1744620915 +0200	commit: Revert "Refactor Trino service and query tool integration"
+f3ef13dfb2078ed581e4fa6ff2a920a13a5d39c3 a8bee8e0368e8bef98c291f4e01207343380975f mark gigris <mark.girgis@vxlabs.de> 1744621136 +0200	commit: Implement query tool routes and API for Trino service integration
+a8bee8e0368e8bef98c291f4e01207343380975f eb33a4ce756882fa35ec1b87bb6406800a0bdef6 mark gigris <mark.girgis@vxlabs.de> 1744621622 +0200	revert: Revert "Refactor Trino service and query tool integration"
+eb33a4ce756882fa35ec1b87bb6406800a0bdef6 a8bca871bd70c7f0fb2e5942a2f1dd50e1c5701f mark gigris <mark.girgis@vxlabs.de> 1744713689 +0200	commit (merge): Add QueryVisualizer component for enhanced data visualization in query tool
+a8bca871bd70c7f0fb2e5942a2f1dd50e1c5701f b220a6a31345ac7f3dbaf49a6ac9dce963037255 mark gigris <mark.girgis@vxlabs.de> 1747574120 +0300	commit: Add Schema Mapper component for event schema mapping functionality
+b220a6a31345ac7f3dbaf49a6ac9dce963037255 d8e16a287c71decdba5bf239b8591473b834da39 mark gigris <mark.girgis@vxlabs.de> 1747828818 +0300	commit: Revert "Refactor Trino service and query tool integration"
+d8e16a287c71decdba5bf239b8591473b834da39 9c2c6cd9449274738547069c6d292273c3b9bce1 mark gigris <mark.girgis@vxlabs.de> 1747831007 +0300	commit: Refactor query tool HTML and JavaScript for improved connection handling and UI updates

@@ -1,0 +1,8 @@
+{
+    "sparkSubmit": {
+        "entryPoint": "s3://aws-emr-studio-381492251123-eu-central-1/test-scripts-for-spark-submit/test.py",
+        "sparkSubmitParameters": "--conf spark.executor.cores=1 --conf spark.executor.memory=2g --conf spark.driver.cores=1 --conf spark.driver.memory=2g --conf spark.executor.instances=2 --conf spark.archives=s3://aws-emr-studio-381492251123-eu-central-1/test-scripts-for-spark-submit/pyspark_venv.tar.gz#environment --jars s3://aws-emr-studio-381492251123-eu-central-1/elasticsearch-spark-30_2.12-8.0.0.jar --conf spark.emr-serverless.driverEnv.PYSPARK_DRIVER_PYTHON=./environment/bin/python --conf spark.emr-serverless.driverEnv.PYSPARK_PYTHON=./environment/bin/python --conf spark.executorEnv.PYSPARK_PYTHON=./environment/bin/python"
+    }
+}
+
+

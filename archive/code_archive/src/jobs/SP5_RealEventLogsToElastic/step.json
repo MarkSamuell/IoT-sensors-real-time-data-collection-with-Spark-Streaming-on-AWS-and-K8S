@@ -1,0 +1,16 @@
+[
+    {
+      "Type": "Spark",
+      "Name": "POC_to_elastic",
+      "ActionOnFailure": "CONTINUE",
+      "Args": [
+        "--deploy-mode", "client",
+        "--master", "yarn",
+        "--conf", "spark.yarn.submit.waitAppCompletion=true",
+        "--conf", "spark.executor.extraJavaOptions=-Djava.security.auth.login.config=/mnt/tmp/jaas.conf",
+        "--conf", "spark.driver.extraJavaOptions=-Djava.security.auth.login.config=/mnt/tmp/jaas.conf", 
+        "--files", "s3://aws-emr-studio-381492251123-eu-central-1/spark_jobs/jaas.conf",
+        "s3://aws-emr-studio-381492251123-eu-central-1/spark_jobs/RealEventLogsToElastic.py"
+      ]
+    }
+  ]

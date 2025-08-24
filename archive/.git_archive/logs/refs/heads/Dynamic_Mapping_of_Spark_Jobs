@@ -1,0 +1,6 @@
+0000000000000000000000000000000000000000 b2537f2a250e7ae56e5d3a129e03011e215587f8 mark gigris <mark.girgis@vxlabs.de> 1748183048 +0300	branch: Created from origin/Dynamic_Mapping_of_Spark_Jobs
+b2537f2a250e7ae56e5d3a129e03011e215587f8 716e8aa5959cb4ac4183957d4429f455406979df mark gigris <mark.girgis@vxlabs.de> 1748377777 +0300	commit: feat: Update EKS job image and add ECS index creation script
+716e8aa5959cb4ac4183957d4429f455406979df 3856a6d3ef46c3ee7586ba22c4ce7f32c9c1bf1a mark gigris <mark.girgis@vxlabs.de> 1749714098 +0300	commit: feat: Add alpine-tools pod configuration and update script for Kubernetes simulator management
+3856a6d3ef46c3ee7586ba22c4ce7f32c9c1bf1a 3b468d49d01f97ca1d781ef4745df094880c47c7 mark gigris <mark.girgis@vxlabs.de> 1750184658 +0300	commit: Refactor code structure for improved readability and maintainability
+3b468d49d01f97ca1d781ef4745df094880c47c7 fa26441e52b322417fe6e2d0ec519572f9e7aa23 mark gigris <mark.girgis@vxlabs.de> 1750245605 +0300	commit: Add API logs producer script and update ConfigMap for Kubernetes simulator
+fa26441e52b322417fe6e2d0ec519572f9e7aa23 86158901099d9a16599859338a49de16056dddd2 mark gigris <mark.girgis@vxlabs.de> 1750335406 +0300	commit: feat: Enhance API logs producer for improved aggregation testing and reporting

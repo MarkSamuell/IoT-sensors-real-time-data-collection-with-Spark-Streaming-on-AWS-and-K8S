@@ -1,0 +1,14 @@
+[
+  {
+    "Type": "Spark",
+    "Name": "Run PySpark",
+    "ActionOnFailure": "CONTINUE",
+    "Args": [
+      "--deploy-mode", "cluster",
+      "--master", "yarn",
+      "s3://aws-emr-studio-381492251123-eu-central-1/test-scripts-for-spark-submit/test2.py"
+    ]
+  }
+]
+
+

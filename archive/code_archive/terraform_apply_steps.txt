@@ -1,0 +1,21 @@
+terrafrom steps
+ 
+pull the new updates
+ 
+inside the envir/dev run
+ 
+sudo apt-get install jq
+ 
+we will need it only one time
+
+sudo apt-get update && sudo apt-get install dos2unix
+
+dos2unix terraformAuth.sh
+ 
+then run the this bash script
+ 
+../.././terraformAuth.sh  YOURASWKEY   YOURAWSSECRET
+ 
+Replace  YOURASWKEY   YOURAWSSECRET by your info, so give it as a 2 parapters
+ 
+then enter yes to make changes

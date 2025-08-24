@@ -1,0 +1,2 @@
+archive/.git_archive/objects/19/* filter=lfs diff=lfs merge=lfs -text
+archive/.git_archive/objects/pack/*.pack filter=lfs diff=lfs merge=lfs -text

@@ -1,0 +1,6 @@
+0000000000000000000000000000000000000000 0ddf2e9310754d5a1ad6ec39650a5c3853415086 mark gigris <mark.girgis@vxlabs.de> 1748079103 +0300	branch: Created from main
+0ddf2e9310754d5a1ad6ec39650a5c3853415086 95c3e92c3fea80201d0f1f2602052680273c74ee mark gigris <mark.girgis@vxlabs.de> 1748382359 +0300	commit: fix: update SIGNALS_LOOKUP_QUERY to use 'name' as signal_id
+95c3e92c3fea80201d0f1f2602052680273c74ee 2db72ff7fa07f8dfd0fba6ab73c3ccdfc40fa2f9 mark gigris <mark.girgis@vxlabs.de> 1748382367 +0300	pull --tags origin stg: Merge made by the 'ort' strategy.
+2db72ff7fa07f8dfd0fba6ab73c3ccdfc40fa2f9 fbcdb97c7e238fd1072d997118b9e3ce873ff379 mark gigris <mark.girgis@vxlabs.de> 1748383412 +0300	commit: fix: update SIGNALS_LOOKUP_QUERY to use 'business_id' as signal_id
+fbcdb97c7e238fd1072d997118b9e3ce873ff379 fe015260c9c774a52e6c5f99d66be4fea8fedb46 mark gigris <mark.girgis@vxlabs.de> 1748405221 +0300	commit: fix: update SECURITY_EVENTS_LOOKUP_QUERY to use 'name' as sev_id
+fe015260c9c774a52e6c5f99d66be4fea8fedb46 8181e64c98d2854fb0c7d9edc4c0bec0a096e8d7 mark gigris <mark.girgis@vxlabs.de> 1748406273 +0300	commit: fix: update SECURITY_EVENTS_LOOKUP_QUERY and SIGNALS_LOOKUP_QUERY to use correct identifiers

@@ -1,0 +1,2 @@
+0000000000000000000000000000000000000000 ffc361801a361fbaa5ed0ddea3a6fa31ce6079a1 mark gigris <mark.girgis@vxlabs.de> 1748014431 +0300	branch: Created from HEAD
+ffc361801a361fbaa5ed0ddea3a6fa31ce6079a1 455fa8d65667d9dba683bdf7725008d07f0cf6d7 mark gigris <mark.girgis@vxlabs.de> 1748014904 +0300	commit (merge): Merge branch 'Native_Cluster_Deployment_to_EKS' of https://dev.azure.com/vxlabs-org/Uraeus/_git/Uraeus%20DataPlatform into merge-native-eks

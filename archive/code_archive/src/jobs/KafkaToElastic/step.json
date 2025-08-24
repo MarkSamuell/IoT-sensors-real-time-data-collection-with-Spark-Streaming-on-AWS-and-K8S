@@ -1,0 +1,14 @@
+[
+    {
+      "Type": "Spark",
+      "Name": "KafkaToEastic2",
+      "ActionOnFailure": "CONTINUE",
+      "Args": [
+        "--deploy-mode", "client",
+        "--master", "yarn",
+        "--conf", "spark.yarn.submit.waitAppCompletion=true",
+        "s3://aws-emr-studio-381492251123-eu-central-1/Spark_Jobs/KafkaToELastic.py"
+      ]
+    }
+  ]
+  

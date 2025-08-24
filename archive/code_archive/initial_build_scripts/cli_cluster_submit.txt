@@ -1,0 +1,3 @@
+aws emr add-steps --cluster-id j-GXKK7YVOU4NP --steps file://C:\Users\mark.girgis\Downloads\data-pipeline\steps.json
+
+aws emr list-steps --cluster-id j-H1HVHXNCB07T

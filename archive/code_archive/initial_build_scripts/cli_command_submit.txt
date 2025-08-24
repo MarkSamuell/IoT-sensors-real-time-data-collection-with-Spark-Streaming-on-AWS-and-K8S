@@ -1,0 +1,11 @@
+aws emr-serverless start-job-run `
+    --application-id 00fl7lr01v30lg15 `
+    --execution-role-arn arn:aws:iam::381492251123:role/ReadAccessForEMRSamples_Role `
+    --name spark-to-elasticsearch-job `
+    --job-driver file://C:/Users/mark.girgis/Downloads/data-pipeline/submit_whl.json` --configuration-overrides file:C:\Users\mark.girgis\Downloads\data-pipeline\configuration-overrides.json
+	
+
+aws emr-serverless update-application `
+    --application-id 00fl7lr01v30lg15 `
+    --configuration-overrides C:\Users\mark.girgis\Downloads\data-pipeline\configuration-overrides.json
+

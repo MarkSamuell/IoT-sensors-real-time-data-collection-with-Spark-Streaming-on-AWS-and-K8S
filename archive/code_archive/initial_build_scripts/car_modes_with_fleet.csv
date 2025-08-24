@@ -1,0 +1,99 @@
+Car Model,VIN Number,Fleet ID,Fleet Name
+Mercedes-Benz C-Class,5ZC7FP1CELU542056,Fleet001,Fleet Alpha
+Nissan Altima,THM35QS7GNW787602,Fleet002,Fleet Bravo
+Mazda CX-5,FCJBK973DHT960860,Fleet003,Fleet Charlie
+Mercedes-Benz C-Class,FBKNVQPO3P8916909,Fleet001,Fleet Alpha
+Subaru Outback,3BV3J0SX765828596,Fleet004,Fleet Delta
+Hyundai Elantra,KXAAA66Z49K588982,Fleet005,Fleet Echo
+Toyota Camry,LKNZM5U782A364319,Fleet002,Fleet Bravo
+Subaru Outback,DLDMEC1HJTJ357517,Fleet004,Fleet Delta
+Honda Accord,1TW2ZQDESAS678424,Fleet003,Fleet Charlie
+BMW 3 Series,DFUJL033LLU546604,Fleet001,Fleet Alpha
+Mazda CX-5,KBTBNV01AYK113631,Fleet003,Fleet Charlie
+BMW 3 Series,UKAR97F5FTE400236,Fleet001,Fleet Alpha
+Ford Mustang,PXH6QA41EYL676540,Fleet005,Fleet Echo
+Nissan Altima,XPH52B0UNEB437989,Fleet002,Fleet Bravo
+Toyota Camry,6VBH7XD5361950961,Fleet002,Fleet Bravo
+Honda Accord,BCK7BFM186V025443,Fleet003,Fleet Charlie
+Toyota Camry,NGCDQU8TCBH013582,Fleet002,Fleet Bravo
+Hyundai Elantra,MYUMYC7WGGW452143,Fleet005,Fleet Echo
+Nissan Altima,2DLXV2IWY9C152840,Fleet002,Fleet Bravo
+Chevrolet Malibu,WLT7C5ZYGJ2677014,Fleet004,Fleet Delta
+Tesla Model 3,SEZMA23JEEV603333,Fleet001,Fleet Alpha
+Chevrolet Malibu,7HZLOUECY77023338,Fleet004,Fleet Delta
+Ford Mustang,EACCV04X7MP508806,Fleet005,Fleet Echo
+Volkswagen Passat,HDLIG8PLJ5H448877,Fleet002,Fleet Bravo
+Volvo XC60,7AE84SZLWLV066186,Fleet003,Fleet Charlie
+Mazda CX-5,2LK4YMPS2V7870949,Fleet003,Fleet Charlie
+Volkswagen Passat,UPSPI6HBD4H026245,Fleet002,Fleet Bravo
+Honda Accord,2SB94ZQISJ2443272,Fleet003,Fleet Charlie
+Jeep Grand Cherokee,5LTWF1ATPS1936453,Fleet004,Fleet Delta
+Hyundai Elantra,UXSRUI1IX3J907404,Fleet005,Fleet Echo
+Toyota Camry,8UYTQJ15VWC113373,Fleet002,Fleet Bravo
+Audi A4,WPV5NWNKDTF127246,Fleet001,Fleet Alpha
+Honda Accord,BDG4ALZVG41730745,Fleet003,Fleet Charlie
+Audi A4,8GU39PJAVJB214828,Fleet001,Fleet Alpha
+Honda Accord,MRY2DZ4KKA3514007,Fleet003,Fleet Charlie
+Hyundai Elantra,JUGZDN58D74815002,Fleet005,Fleet Echo
+Audi A4,RFJ9H2WT9BL296152,Fleet001,Fleet Alpha
+Chevrolet Malibu,YDJ3FHZ2456045436,Fleet004,Fleet Delta
+Volkswagen Passat,DLE32IGN2YG385094,Fleet002,Fleet Bravo
+Subaru Outback,LZJJCNE7K7R802802,Fleet004,Fleet Delta
+Audi A4,GVKSWQ6YPXN978357,Fleet001,Fleet Alpha
+Chevrolet Malibu,TAEKL9PASR1939533,Fleet004,Fleet Delta
+Tesla Model 3,KRA53P9069G061753,Fleet001,Fleet Alpha
+Mazda CX-5,MAPFAWVQJS6309587,Fleet003,Fleet Charlie
+Kia Optima,SNU4I9DABNF109573,Fleet005,Fleet Echo
+Mercedes-Benz C-Class,TUNH1LL5CEC932197,Fleet001,Fleet Alpha
+BMW 3 Series,1CKUDTGA622213110,Fleet001,Fleet Alpha
+Ford Mustang,7AK647OI7VL621962,Fleet005,Fleet Echo
+Audi A4,MRXQBMNKKVR522563,Fleet001,Fleet Alpha
+Subaru Outback,SBVXIO80ETH147399,Fleet004,Fleet Delta
+Chevrolet Malibu,2WTZN06C5KG541781,Fleet004,Fleet Delta
+Subaru Outback,PBLSFJ9BM86119229,Fleet004,Fleet Delta
+Mercedes-Benz C-Class,MCRA88PC165768280,Fleet001,Fleet Alpha
+Nissan Altima,HSUL9LP272Z278966,Fleet002,Fleet Bravo
+Volvo XC60,SNN51Q1BWHD357318,Fleet003,Fleet Charlie
+Nissan Altima,ASFP9RTTH78901944,Fleet002,Fleet Bravo
+Toyota Camry,9RPO7QXTA7L694205,Fleet002,Fleet Bravo
+Volvo XC60,SASPYZ1VN6C771222,Fleet003,Fleet Charlie
+Nissan Altima,SYJ7QY321E8980730,Fleet002,Fleet Bravo
+Volkswagen Passat,3NY94IFO1DX053398,Fleet002,Fleet Bravo
+Kia Optima,XSH13K1VE7U204655,Fleet005,Fleet Echo
+Jeep Grand Cherokee,FHCS6KW7X8G265532,Fleet004,Fleet Delta
+Audi A4,ALW8BWGBE67225290,Fleet001,Fleet Alpha
+Mazda CX-5,JBXO5FAV1BJ655045,Fleet003,Fleet Charlie
+Audi A4,AHEI0MK244D469824,Fleet001,Fleet Alpha
+Hyundai Elantra,4HEPE3WQ3YU739639,Fleet005,Fleet Echo
+Audi A4,MMZX55XE5D4813717,Fleet001,Fleet Alpha
+Audi A4,GHA70YVWXXV695806,Fleet001,Fleet Alpha
+Tesla Model 3,DJJR8HJQMXR693693,Fleet001,Fleet Alpha
+Nissan Altima,YLYJWUYQX7D910296,Fleet002,Fleet Bravo
+Volkswagen Passat,MYA9FT6NPYK247121,Fleet002,Fleet Bravo
+Chevrolet Malibu,UKS18Z4EEBR422273,Fleet004,Fleet Delta
+Nissan Altima,2EFSWQ2O7JR521017,Fleet002,Fleet Bravo
+BMW 3 Series,YGEGFL7PRPC815346,Fleet001,Fleet Alpha
+Subaru Outback,4ZPZK8PP8JN087869,Fleet004,Fleet Delta
+Kia Optima,GUMPLZX49CM298399,Fleet005,Fleet Echo
+Kia Optima,ACKMBQ4OATG983747,Fleet005,Fleet Echo
+Kia Optima,PRU8B33WY9C231659,Fleet005,Fleet Echo
+Mercedes-Benz C-Class,SMZNIOXN4XL768724,Fleet001,Fleet Alpha
+Kia Optima,5CPEGA6XHTM593640,Fleet005,Fleet Echo
+Toyota Camry,LFXIQEKO7RT744988,Fleet002,Fleet Bravo
+Ford Mustang,4YFZ6GQG8J4377799,Fleet005,Fleet Echo
+Honda Accord,KVDNY5XB9K9517682,Fleet003,Fleet Charlie
+Mercedes-Benz C-Class,PEA3LYMA5NT374320,Fleet001,Fleet Alpha
+Subaru Outback,DTLINMVSCJ3155381,Fleet004,Fleet Delta
+Volvo XC60,TLWRYX5DASL560718,Fleet003,Fleet Charlie
+Volkswagen Passat,YUABR2EQ89P306883,Fleet002,Fleet Bravo
+Kia Optima,1JYLJ7XREDN571506,Fleet005,Fleet Echo
+Chevrolet Malibu,TSKKJC9XA7D645571,Fleet004,Fleet Delta
+Mazda CX-5,2FZEQW3DZHL931338,Fleet003,Fleet Charlie
+Honda Accord,7AU7S32NCV7009385,Fleet003,Fleet Charlie
+Volvo XC60,BCXQ7T6BJ9M105630,Fleet003,Fleet Charlie
+BMW 3 Series,MYDVSEUZTRE522431,Fleet001,Fleet Alpha
+Tesla Model 3,SCCH3BLA1AH159181,Fleet001,Fleet Alpha
+Chevrolet Malibu,LGHPUSK5WA3153140,Fleet004,Fleet Delta
+Ford Mustang,EMN18GCYN42094594,Fleet005,Fleet Echo
+Tesla Model 3,BUCX5JQ3T89910721,Fleet001,Fleet Alpha
+Hyundai Elantra,JZR1ANYV5DF648830,Fleet005,Fleet Echo
