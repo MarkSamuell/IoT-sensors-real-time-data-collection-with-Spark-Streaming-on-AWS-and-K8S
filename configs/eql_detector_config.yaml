@@ -1,0 +1,134 @@
+# Elasticsearch connection settings
+elasticsearch:
+  host: "127.0.0.1"
+  port: 9002
+  scheme: "http"
+  # Add credentials if needed
+  # username: "elastic"
+  # password: "password"
+
+# Index to store security events
+target_index: "api_sevs"
+
+# All EQL queries in a single configuration
+queries:
+  # Brute Force Detection with minimum 10 failures
+  - id: "brute_force_login"
+    type: "eql_based"
+    source_index: "api_logs"
+    timestamp_field: "timestamp"
+    interval: 10  # Longer interval to avoid repeated detection
+    size: 100
+    eql_query: |
+      sequence by request.source_ip with maxspan=30s 
+      [any where request.path=="/login" and (response.status_code==400 or response.status_code==401 or response.status_code==403)] with runs=10
+      [any where request.path=="/login" and response.status_code==200]
+    sev_config:
+      id_prefix: "BF"
+      name: "Brute Force Login Attack"
+      severity: "Critical"
+      description: "Detected 10+ failed login attempts followed by successful login from IP {source_ip}"
+      dynamic_fields:
+        source_ip: "request.source_ip"
+        login_count: "_count"
+
+  # SQL Injection Detection
+  - id: "sql_injection"
+    type: "eql_based"
+    source_index: "api_logs"
+    timestamp_field: "timestamp"
+    interval: 5
+    size: 100
+    eql_query: |
+      any where (
+        request.query_params.query like "*SELECT*" or
+        request.query_params.query like "*--*" or
+        request.query_params.query like "*xp_cmdshell*" or
+        request.query_params.query like "*DROP*" or
+        request.query_params.query like "*OR 1=1*" or
+        request.body.searchTerm like "*SELECT*" or
+        request.body.searchTerm like "*--*" or
+        request.body.searchTerm like "*xp_cmdshell*" or
+        request.body.searchTerm like "*DROP*" or
+        request.body.searchTerm like "*OR 1=1*"
+      )
+    sev_config:
+      id_prefix: "SQLI"
+      name: "SQL Injection Attempt"
+      severity: "High"
+      description: "Detected SQL injection attempt from IP {source_ip} on path {request_path}"
+      dynamic_fields:
+        source_ip: "request.source_ip"
+        request_path: "request.path"
+
+# Index configurations
+indices:
+  - name: "api_sevs"
+    mappings:
+      mappings:
+        dynamic: "strict"  # Prevent unexpected field additions
+        properties:
+          # Core Security Event Fields
+          sev_id:
+            type: "keyword"
+          sev_name:
+            type: "keyword"
+          description:
+            type: "text"
+          severity:
+            type: "keyword"
+          type:
+            type: "keyword"
+          
+          # Timestamp Fields
+          detection_time:
+            type: "date"
+            format: "strict_date_optional_time||epoch_millis"
+          timestamp:
+            type: "date"
+            format: "strict_date_optional_time||epoch_millis"
+          
+          # Source Tracking
+          source_index:
+            type: "keyword"
+          query_id:
+            type: "keyword"
+          
+          # Threat Indicators
+          iocs:
+            type: "nested"
+            properties:
+              request_id:
+                type: "keyword"
+              timestamp:
+                type: "date"
+                format: "strict_date_optional_time||epoch_millis"
+              source_ip:
+                type: "ip"
+              method:
+                type: "keyword"
+              path:
+                type: "keyword"
+              status_code:
+                type: "integer"
+          
+          # Dynamic Fields
+          source_ip:
+            type: "ip"
+          request_path:
+            type: "keyword"
+          login_count:
+            type: "integer"
+          
+          # Metadata
+          metadata:
+            type: "object"
+            dynamic: true
+      
+      settings:
+        number_of_shards: 1
+        number_of_replicas: 0
+        refresh_interval: "1s"
+        mapping:
+          total_fields:
+            limit: 2000

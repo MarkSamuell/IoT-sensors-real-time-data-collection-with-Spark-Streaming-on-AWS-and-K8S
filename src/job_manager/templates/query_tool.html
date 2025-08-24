@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Query Tool - EMR Job Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Add CodeMirror for SQL editor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/darcula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/sql-hint.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12H4.5a2.5 2.5 0 0 1 0-5H9"></path>
+                    <path d="M15 12h4.5a2.5 2.5 0 0 0 0-5H15"></path>
+                    <line x1="9" y1="12" x2="15" y2="12"></line>
+                    <line x1="9" y1="17" x2="15" y2="17"></line>
+                    <line x1="12" y1="12" x2="12" y2="17"></line>
+                </svg>
+                EMR Job Manager
+            </div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item" id="dashboard-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    Dashboard
+                </li>
+                <li class="sidebar-menu-item" id="all-jobs-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="12" x2="16" y2="12"></line>
+                        <line x1="16" y1="12" x2="14" y2="15"></line>
+                        <line x1="10" y1="15" x2="8" y2="12"></line>
+                        <line x1="2" y1="12" x2="8" y2="12"></line>
+                    </svg>
+                    All Jobs
+                </li>
+                <li class="sidebar-menu-item active" id="query-tool-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                        <line x1="9" y1="20" x2="15" y2="20"></line>
+                        <line x1="12" y1="4" x2="12" y2="20"></line>
+                    </svg>
+                    Query Tool
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                Job Manager v1.0.0
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Header -->
+                <div class="main-header">
+                    <div>
+                        <div class="breadcrumb">
+                            <a href="{{ url_for('index') }}">Dashboard</a>
+                            <span class="breadcrumb-separator">/</span>
+                            <span>Query Tool</span>
+                        </div>
+                        <h1 class="page-title">Trino Query Tool</h1>
+                    </div>
+                    <div>
+                        <button id="connection-settings-btn" class="btn btn-primary">
+                        <button id="connection-settings-btn" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                            Connection Settings
+                            Connection Settings
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Connection Settings Bar -->
+                <div class="connection-bar">
+                    <div class="connection-info">
+                        <span class="connection-label">Host:</span>
+                        <span class="connection-value" id="connection-host">{{ connection.host }}</span>
+                        <span class="connection-label">Port:</span>
+                        <span class="connection-value" id="connection-port">{{ connection.port }}</span>
+                        <span class="connection-label">Catalog:</span>
+                        <span class="connection-value" id="connection-catalog">{{ connection.catalog }}</span>
+                        <span class="connection-label">Schema:</span>
+                        <span class="connection-value" id="connection-schema">{{ connection.schema }}</span>
+                    </div>
+                    <div class="connection-status">
+                        <span class="status-indicator status-default" id="connection-status-indicator"></span>
+                        <span class="status-indicator status-default" id="connection-status-indicator"></span>
+                        <span id="connection-status-text">Not Connected</span>
+                    </div>
+                </div>
+
+                <!-- Query Tool Container -->
+                <div class="query-tool-container">
+                    <!-- Left Panel: Tables and metadata -->
+                    <div class="sidebar-panel">
+                        <div class="panel-header">
+                            <h3>Tables</h3>
+                            <button id="refresh-tables-btn" class="btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 4v6h-6"></path>
+                                    <path d="M1 20v-6h6"></path>
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
+                                    <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="panel-content">
+                            <div id="tables-instructions" class="tables-instructions">
+                                <div class="text-center text-muted p-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-md">
+                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                    </svg>
+                                    <p>Please configure connection settings to view tables</p>
+                                    <button id="show-connection-settings-btn" class="btn btn-primary btn-sm mt-md">
+                                        Configure Connection
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tables-loading" style="display: none;">
+                            <div id="tables-instructions" class="tables-instructions">
+                                <div class="text-center text-muted p-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-md">
+                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                    </svg>
+                                    <p>Please configure connection settings to view tables</p>
+                                    <button id="show-connection-settings-btn" class="btn btn-primary btn-sm mt-md">
+                                        Configure Connection
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tables-loading" style="display: none;">
+                                <div class="loader"></div>
+                                <p>Loading tables...</p>
+                            </div>
+                            <div class="tables-list" style="display: none;">
+                                <!-- Tables will be populated here -->
+                            </div>
+                            <div class="tables-error" style="display: none;">
+                                <div class="text-center text-danger p-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-md">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    <p id="tables-error-message">Connection error</p>
+                                    <button id="retry-connection-btn" class="btn btn-primary btn-sm mt-md">
+                                        Retry Connection
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tables-error" style="display: none;">
+                                <div class="text-center text-danger p-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-md">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                    <p id="tables-error-message">Connection error</p>
+                                    <button id="retry-connection-btn" class="btn btn-primary btn-sm mt-md">
+                                        Retry Connection
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Panel -->
+                    <div class="main-panel">
+                        <!-- Query Editor -->
+                        <div class="card mb-md">
+                            <div class="card-header">
+                                <h2 class="card-title">SQL Query</h2>
+                                <div class="query-actions">
+                                    <button id="run-query-btn" class="btn btn-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                        </svg>
+                                        Run Query
+                                    </button>
+                                    <button id="clear-query-btn" class="btn btn-secondary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                                        </svg>
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <textarea id="sql-editor" placeholder="Enter your SQL query here..."></textarea>
+                                <textarea id="sql-editor" placeholder="Enter your SQL query here..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Query Results -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Query Results</h2>
+                                <div class="results-actions">
+                                    <span id="query-stats" class="query-stats d-none">
+                                        <span id="row-count">0</span> rows returned in <span id="query-time">0</span> seconds
+                                    </span>
+                                    <button id="download-csv-btn" class="btn btn-secondary d-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                        </svg>
+                                        Download CSV
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="query-status" class="query-status">
+                                    <p class="text-muted text-center">Run a query to see results</p>
+                                </div>
+                                <div id="query-results" class="query-results d-none">
+                                    <div class="results-scroll-container">
+                                    <div class="results-scroll-container">
+                                        <table id="results-table" class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <!-- Column headers will be populated dynamically -->
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Results will be populated dynamically -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Connection Settings Modal -->
+    <div id="connection-settings-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Trino Connection Settings</h2>
+                <button class="btn-icon close-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="connection-form">
+                    <div class="form-group">
+                        <label for="connection-host-input">Host</label>
+                        <input type="text" id="connection-host-input" class="form-control" value="{{ connection.host }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="connection-port-input">Port</label>
+                        <input type="number" id="connection-port-input" class="form-control" value="{{ connection.port }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="connection-user-input">User</label>
+                        <input type="text" id="connection-user-input" class="form-control" value="{{ connection.user }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="connection-catalog-input">Catalog</label>
+                        <input type="text" id="connection-catalog-input" class="form-control" value="{{ connection.catalog }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="connection-schema-input">Schema</label>
+                        <input type="text" id="connection-schema-input" class="form-control" value="{{ connection.schema }}" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Cancel</button>
+                <button id="save-connection-btn" class="btn btn-primary">Connect</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Connection settings
+            let connectionSettings = {
+                host: "{{ connection.host }}",
+                port: "{{ connection.port }}",
+                user: "{{ connection.user }}",
+                catalog: "{{ connection.catalog }}",
+                schema: "{{ connection.schema }}"
+            };
+            
+            // Connection status flags
+            let isConnected = false;
+            
+            // Connection status flags
+            let isConnected = false;
+            
+            // Initialize SQL editor
+            const sqlEditor = CodeMirror.fromTextArea(document.getElementById('sql-editor'), {
+                mode: 'text/x-sql',
+                theme: 'darcula',
+                lineNumbers: true,
+                indentWithTabs: true,
+                smartIndent: true,
+                lineWrapping: true,
+                matchBrackets: true,
+                autofocus: true,
+                extraKeys: {"Ctrl-Space": "autocomplete"},
+                hintOptions: {tables: {}}
+            });
+            
+            // Set editor height
+            sqlEditor.setSize(null, 200);
+            
+            // Connection settings modal
+            const connectionModal = document.getElementById('connection-settings-modal');
+            const openConnectionBtn = document.getElementById('connection-settings-btn');
+            const showConnectionBtn = document.getElementById('show-connection-settings-btn');
+            const showConnectionBtn = document.getElementById('show-connection-settings-btn');
+            const closeModalButtons = document.querySelectorAll('.close-modal');
+            const saveConnectionBtn = document.getElementById('save-connection-btn');
+            const retryConnectionBtn = document.getElementById('retry-connection-btn');
+            
+            // Open connection modal
+            function openConnectionModal() {
+                document.getElementById('connection-host-input').value = connectionSettings.host;
+                document.getElementById('connection-port-input').value = connectionSettings.port;
+                document.getElementById('connection-user-input').value = connectionSettings.user;
+                document.getElementById('connection-catalog-input').value = connectionSettings.catalog;
+                document.getElementById('connection-schema-input').value = connectionSettings.schema;
+            const retryConnectionBtn = document.getElementById('retry-connection-btn');
+            
+            // Open connection modal
+            function openConnectionModal() {
+                document.getElementById('connection-host-input').value = connectionSettings.host;
+                document.getElementById('connection-port-input').value = connectionSettings.port;
+                document.getElementById('connection-user-input').value = connectionSettings.user;
+                document.getElementById('connection-catalog-input').value = connectionSettings.catalog;
+                document.getElementById('connection-schema-input').value = connectionSettings.schema;
+                connectionModal.style.display = 'block';
+            }
+            
+            openConnectionBtn.addEventListener('click', openConnectionModal);
+            showConnectionBtn.addEventListener('click', openConnectionModal);
+            }
+            
+            openConnectionBtn.addEventListener('click', openConnectionModal);
+            showConnectionBtn.addEventListener('click', openConnectionModal);
+            
+            closeModalButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    connectionModal.style.display = 'none';
+                });
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target === connectionModal) {
+                    connectionModal.style.display = 'none';
+                }
+            });
+            
+            saveConnectionBtn.addEventListener('click', function() {
+                // Get form values
+                const host = document.getElementById('connection-host-input').value;
+                const port = document.getElementById('connection-port-input').value;
+                const user = document.getElementById('connection-user-input').value;
+                const catalog = document.getElementById('connection-catalog-input').value;
+                const schema = document.getElementById('connection-schema-input').value;
+                
+                // Validate form
+                if (!host || !port || !user || !catalog || !schema) {
+                    alert('All connection fields are required');
+                    return;
+                }
+                
+                // Update connection settings
+                connectionSettings = {
+                    host: host,
+                    port: port,  // Keep as string
+                    port: port,  // Keep as string
+                    user: user,
+                    catalog: catalog,
+                    schema: schema
+                };
+                
+                // Update connection info display
+                document.getElementById('connection-host').textContent = host;
+                document.getElementById('connection-port').textContent = port;
+                document.getElementById('connection-catalog').textContent = catalog;
+                document.getElementById('connection-schema').textContent = schema;
+                
+                // Update connection status
+                updateConnectionStatus('connecting');
+                
+                // Test connection by loading tables
+                loadTables();
+                
+                // Close modal
+                connectionModal.style.display = 'none';
+            });
+            
+            // Function to update connection status
+            function updateConnectionStatus(status) {
+                const indicator = document.getElementById('connection-status-indicator');
+                const text = document.getElementById('connection-status-text');
+                
+                if (status === 'connected') {
+                    indicator.className = 'status-indicator status-running';
+                    text.textContent = 'Connected';
+                    isConnected = true;
+                    isConnected = true;
+                } else if (status === 'connecting') {
+                    indicator.className = 'status-indicator status-pending';
+                    text.textContent = 'Connecting...';
+                    isConnected = false;
+                    isConnected = false;
+                } else if (status === 'error') {
+                    indicator.className = 'status-indicator status-failed';
+                    text.textContent = 'Connection Failed';
+                    isConnected = false;
+                    isConnected = false;
+                } else {
+                    indicator.className = 'status-indicator status-default';
+                    indicator.className = 'status-indicator status-default';
+                    text.textContent = 'Not Connected';
+                    isConnected = false;
+                    isConnected = false;
+                }
+            }
+            
+            // Function to load tables with current connection settings
+            function loadTables() {
+                // Only load tables if connection settings are complete
+                if (!connectionSettings.host || !connectionSettings.port) {
+                    showTablesInstruction();
+                    return;
+                }
+
+                // Only load tables if connection settings are complete
+                if (!connectionSettings.host || !connectionSettings.port) {
+                    showTablesInstruction();
+                    return;
+                }
+
+                const tablesList = document.querySelector('.tables-list');
+                const tablesLoading = document.querySelector('.tables-loading');
+                const tablesError = document.querySelector('.tables-error');
+                const tablesInstructions = document.getElementById('tables-instructions');
+                const tablesError = document.querySelector('.tables-error');
+                const tablesInstructions = document.getElementById('tables-instructions');
+                
+                // Hide everything and show loading
+                tablesInstructions.style.display = 'none';
+                // Hide everything and show loading
+                tablesInstructions.style.display = 'none';
+                tablesList.style.display = 'none';
+                tablesError.style.display = 'none';
+                tablesError.style.display = 'none';
+                tablesLoading.style.display = 'flex';
+                
+                fetch('/api/get_tables', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(connectionSettings)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    tablesLoading.style.display = 'none';
+                    
+                    tablesLoading.style.display = 'none';
+                    
+                    if (data.success) {
+                        updateConnectionStatus('connected');
+                        
+                        // Group tables by schema
+                        const tables = data.data;
+                        const schemaMap = {};
+                        // Group tables by schema
+                        const tables = data.data;
+                        const schemaMap = {};
+                        
+                        tables.forEach(table => {
+                        tables.forEach(table => {
+                            const schema = table.table_schema;
+                            const tableName = table.table_name;
+                            
+                            if (!schemaMap[schema]) {
+                                schemaMap[schema] = [];
+                            if (!schemaMap[schema]) {
+                                schemaMap[schema] = [];
+                            }
+                            
+                            schemaMap[schema].push(tableName);
+                        });
+                            
+                            schemaMap[schema].push(tableName);
+                        });
+                        
+                        // Generate HTML for tables
+                        let html = '';
+                        
+                        for (const schema in schemaMap) {
+                            html += `
+                                <div class="schema-item">
+                                    <div class="schema-header">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                        </svg>
+                                        <span>${schema}</span>
+                                    </div>
+                                    <div class="schema-tables">
+                                        <ul class="table-list">
+                            `;
+                        // Generate HTML for tables
+                        let html = '';
+                        
+                        for (const schema in schemaMap) {
+                            html += `
+                                <div class="schema-item">
+                                    <div class="schema-header">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                        </svg>
+                                        <span>${schema}</span>
+                                    </div>
+                                    <div class="schema-tables">
+                                        <ul class="table-list">
+                            `;
+                            
+                            schemaMap[schema].forEach(table => {
+                                html += `
+                                    <li class="table-item">
+                                        <button class="table-button" data-table="${table}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                <line x1="3" y1="9" x2="21" y2="9"></line>
+                                                <line x1="3" y1="15" x2="21" y2="15"></line>
+                                                <line x1="9" y1="3" x2="9" y2="21"></line>
+                                                <line x1="15" y1="3" x2="15" y2="21"></line>
+                                            </svg>
+                                            ${table}
+                                        </button>
+                                    </li>
+                                `;
+                            });
+                            
+                            html += `
+                                        </ul>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        
+                        // If no tables found
+                        if (Object.keys(schemaMap).length === 0) {
+                            html = `<p class="text-center text-muted">No tables found in schema</p>`;
+                            schemaMap[schema].forEach(table => {
+                                html += `
+                                    <li class="table-item">
+                                        <button class="table-button" data-table="${table}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                <line x1="3" y1="9" x2="21" y2="9"></line>
+                                                <line x1="3" y1="15" x2="21" y2="15"></line>
+                                                <line x1="9" y1="3" x2="9" y2="21"></line>
+                                                <line x1="15" y1="3" x2="15" y2="21"></line>
+                                            </svg>
+                                            ${table}
+                                        </button>
+                                    </li>
+                                `;
+                            });
+                            
+                            html += `
+                                        </ul>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        
+                        // If no tables found
+                        if (Object.keys(schemaMap).length === 0) {
+                            html = `<p class="text-center text-muted">No tables found in schema</p>`;
+                        }
+                        
+                        tablesList.innerHTML = html;
+                        tablesList.innerHTML = html;
+                        tablesList.style.display = 'block';
+                        
+                        // Add event listeners to table buttons
+                        document.querySelectorAll('.table-button').forEach(button => {
+                            button.addEventListener('click', function() {
+                                const tableName = this.getAttribute('data-table');
+                                insertTableName(tableName);
+                            });
+                        });
+                        
+                        // Add event listeners to schema headers
+                        document.querySelectorAll('.schema-header').forEach(header => {
+                            header.addEventListener('click', function() {
+                                const tables = this.nextElementSibling;
+                                if (tables.style.display === 'none') {
+                                    tables.style.display = 'block';
+                                } else {
+                                    tables.style.display = 'none';
+                                }
+                            });
+                        });
+                        
+                        
+                        // Add event listeners to table buttons
+                        document.querySelectorAll('.table-button').forEach(button => {
+                            button.addEventListener('click', function() {
+                                const tableName = this.getAttribute('data-table');
+                                insertTableName(tableName);
+                            });
+                        });
+                        
+                        // Add event listeners to schema headers
+                        document.querySelectorAll('.schema-header').forEach(header => {
+                            header.addEventListener('click', function() {
+                                const tables = this.nextElementSibling;
+                                if (tables.style.display === 'none') {
+                                    tables.style.display = 'block';
+                                } else {
+                                    tables.style.display = 'none';
+                                }
+                            });
+                        });
+                        
+                    } else {
+                        updateConnectionStatus('error');
+                        showTablesError(data.message || 'Failed to load tables');
+                        showTablesError(data.message || 'Failed to load tables');
+                    }
+                })
+                .catch(error => {
+                    updateConnectionStatus('error');
+                    showTablesError(error.message || 'Connection error');
+                    tablesLoading.style.display = 'none';
+                });
+            }
+            
+            // Function to show tables instructions
+            function showTablesInstruction() {
+                document.querySelector('.tables-list').style.display = 'none';
+                document.querySelector('.tables-loading').style.display = 'none';
+                document.querySelector('.tables-error').style.display = 'none';
+                document.getElementById('tables-instructions').style.display = 'block';
+            }
+            
+            // Function to show tables error
+            function showTablesError(message) {
+                const tablesError = document.querySelector('.tables-error');
+                const errorMessage = document.getElementById('tables-error-message');
+                
+                document.querySelector('.tables-list').style.display = 'none';
+                document.querySelector('.tables-loading').style.display = 'none';
+                document.getElementById('tables-instructions').style.display = 'none';
+                
+                errorMessage.textContent = message;
+                tablesError.style.display = 'block';
+                    showTablesError(error.message || 'Connection error');
+                    tablesLoading.style.display = 'none';
+                });
+            }
+            
+            // Function to show tables instructions
+            function showTablesInstruction() {
+                document.querySelector('.tables-list').style.display = 'none';
+                document.querySelector('.tables-loading').style.display = 'none';
+                document.querySelector('.tables-error').style.display = 'none';
+                document.getElementById('tables-instructions').style.display = 'block';
+            }
+            
+            // Function to show tables error
+            function showTablesError(message) {
+                const tablesError = document.querySelector('.tables-error');
+                const errorMessage = document.getElementById('tables-error-message');
+                
+                document.querySelector('.tables-list').style.display = 'none';
+                document.querySelector('.tables-loading').style.display = 'none';
+                document.getElementById('tables-instructions').style.display = 'none';
+                
+                errorMessage.textContent = message;
+                tablesError.style.display = 'block';
+            }
+            
+            // Function to insert table name into editor
+            function insertTableName(tableName) {
+            function insertTableName(tableName) {
+                const cursor = sqlEditor.getCursor();
+                sqlEditor.replaceRange(`${tableName}`, cursor);
+                sqlEditor.focus();
+            }
+            
+            // Function to execute query with current connection settings
+            function executeQuery() {
+                const query = sqlEditor.getValue().trim();
+                
+                if (!isConnected) {
+                    showError('Not connected to Trino server. Please configure and test your connection first.');
+                    return;
+                }
+                
+                
+                if (!isConnected) {
+                    showError('Not connected to Trino server. Please configure and test your connection first.');
+                    return;
+                }
+                
+                if (!query) {
+                    showError('Query cannot be empty');
+                    return;
+                }
+                
+                // Clear previous results and show loading state
+                // Clear previous results and show loading state
+                document.getElementById('query-status').innerHTML = `
+                    <div class="loading-container">
+                        <div class="loader"></div>
+                        <p>Executing query...</p>
+                    </div>
+                `;
+                
+                document.getElementById('query-status').classList.remove('d-none');
+                document.getElementById('query-results').classList.add('d-none');
+                document.getElementById('query-stats').classList.add('d-none');
+                document.getElementById('download-csv-btn').classList.add('d-none');
+                
+                const startTime = new Date();
+                
+                fetch('/api/execute_query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        ...connectionSettings
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const endTime = new Date();
+                    const executionTime = ((endTime - startTime) / 1000).toFixed(2);
+                    
+                    document.getElementById('query-time').textContent = executionTime;
+                    
+                    if (data.success) {
+                        document.getElementById('row-count').textContent = data.row_count;
+                        document.getElementById('query-stats').classList.remove('d-none');
+                        document.getElementById('download-csv-btn').classList.remove('d-none');
+                        
+                        displayResults(data);
+                    } else {
+                        showError(data.message || 'Query execution failed');
+                        showError(data.message || 'Query execution failed');
+                    }
+                })
+                .catch(error => {
+                    showError('Failed to execute query: ' + error.message);
+                });
+            }
+            
+            // Function to display query results
+            function displayResults(data) {
+                const resultsTable = document.getElementById('results-table');
+                
+                // Clear previous results
+                resultsTable.querySelector('thead tr').innerHTML = '';
+                resultsTable.querySelector('tbody').innerHTML = '';
+                
+                // Add column headers
+                for (const column of data.columns) {
+                    const th = document.createElement('th');
+                    th.textContent = column;
+                    resultsTable.querySelector('thead tr').appendChild(th);
+                }
+                
+                // Add data rows
+                for (const row of data.data) {
+                    const tr = document.createElement('tr');
+                    
+                    for (const column of data.columns) {
+                        const td = document.createElement('td');
+                        // Handle null values and convert to string
+                        td.textContent = row[column] !== null ? String(row[column]) : 'NULL';
+                        // Handle null values and convert to string
+                        td.textContent = row[column] !== null ? String(row[column]) : 'NULL';
+                        tr.appendChild(td);
+                    }
+                    
+                    resultsTable.querySelector('tbody').appendChild(tr);
+                }
+                
+                // Show results and hide loading
+                document.getElementById('query-status').classList.add('d-none');
+                document.getElementById('query-results').classList.remove('d-none');
+            }
+            
+            // Function to clear query
+            function clearQuery() {
+                sqlEditor.setValue('');
+                sqlEditor.focus();
+            }
+            
+            // Function to download CSV with current connection settings
+            function downloadCsv() {
+                const query = sqlEditor.getValue().trim();
+                
+                if (!isConnected) {
+                    showError('Not connected to Trino server. Please configure and test your connection first.');
+                    return;
+                }
+                
+                
+                if (!isConnected) {
+                    showError('Not connected to Trino server. Please configure and test your connection first.');
+                    return;
+                }
+                
+                if (!query) {
+                    showError('Query cannot be empty');
+                    return;
+                }
+                
+                // Create URL with parameters
+                const params = new URLSearchParams();
+                params.append('query', query);
+                // Create URL with parameters
+                const params = new URLSearchParams();
+                params.append('query', query);
+                for (const [key, value] of Object.entries(connectionSettings)) {
+                    params.append(key, value);
+                }
+                
+                // Use GET method with query parameters instead of POST with JSON
+                window.location.href = `/api/download_csv?${params.toString()}`;
+                    params.append(key, value);
+                }
+                
+                // Use GET method with query parameters instead of POST with JSON
+                window.location.href = `/api/download_csv?${params.toString()}`;
+            }
+            
+            // Function to show error
+            function showError(message) {
+                document.getElementById('query-status').innerHTML = `
+                    <div class="error-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <p class="text-danger">${message}</p>
+                    </div>
+                `;
+                
+                document.getElementById('query-status').classList.remove('d-none');
+                document.getElementById('query-results').classList.add('d-none');
+                document.getElementById('query-stats').classList.add('d-none');
+                document.getElementById('download-csv-btn').classList.add('d-none');
+            }
+            
+            // Check if we have connection settings on page load
+            if (connectionSettings.host && connectionSettings.port) {
+                // If we have connection settings, try to connect
+                updateConnectionStatus('connecting');
+                loadTables();
+            } else {
+                // Otherwise show instructions
+                showTablesInstruction();
+            }
+            // Check if we have connection settings on page load
+            if (connectionSettings.host && connectionSettings.port) {
+                // If we have connection settings, try to connect
+                updateConnectionStatus('connecting');
+                loadTables();
+            } else {
+                // Otherwise show instructions
+                showTablesInstruction();
+            }
+            
+            // Button click handlers
+            document.getElementById('run-query-btn').addEventListener('click', executeQuery);
+            document.getElementById('clear-query-btn').addEventListener('click', clearQuery);
+            document.getElementById('download-csv-btn').addEventListener('click', downloadCsv);
+            document.getElementById('refresh-tables-btn').addEventListener('click', loadTables);
+            document.getElementById('retry-connection-btn').addEventListener('click', loadTables);
+            document.getElementById('retry-connection-btn').addEventListener('click', loadTables);
+            
+            // Navigation handlers
+            document.getElementById('dashboard-nav').addEventListener('click', function() {
+                window.location.href = "{{ url_for('index') }}";
+            });
+            
+            document.getElementById('all-jobs-nav').addEventListener('click', function() {
+                // Navigate to all jobs view when implemented
+                window.location.href = "/";
+            });
+            
+            document.getElementById('all-jobs-nav').addEventListener('click', function() {
+                // Navigate to all jobs view when implemented
+                window.location.href = "/";
+            });
+        });
+    </script>
+
+    <style>
+        /* Query Tool Specific Styles */
+        .query-tool-container {
+            display: flex;
+            gap: var(--space-md);
+            height: calc(100vh - 180px);
+        }
+        
+        .sidebar-panel {
+            width: 250px;
+            flex-shrink: 0;
+            background-color: var(--background-light);
+            border-radius: var(--card-border-radius);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .panel-header {
+            padding: var(--space-sm) var(--space-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--background-darker);
+        }
+        
+        .panel-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .panel-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: var(--space-sm);
+        }
+        
+        .main-panel {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .main-panel .card {
+            margin-bottom: var(--space-md);
+            flex-shrink: 0;
+        }
+        
+        .main-panel .card:last-child {
+            margin-bottom: 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .main-panel .card:last-child .card-body {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        
+        /* CodeMirror Styles */
+        .CodeMirror {
+            height: 200px;
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Tables List Styles */
+        .tables-loading, .tables-instructions {
+        .tables-loading, .tables-instructions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+            padding: var(--space-lg);
+            gap: var(--space-sm);
+        }
+        
+        .schema-item {
+            margin-bottom: var(--space-sm);
+        }
+        
+        .schema-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            padding: var(--space-xs) var(--space-sm);
+            background-color: var(--background-darker);
+            border-radius: var(--card-border-radius);
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .schema-tables {
+            padding-left: var(--space-md);
+            margin-top: var(--space-xs);
+        }
+        
+        .table-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .table-item {
+            margin-bottom: 2px;
+        }
+        
+        .table-button {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            padding: 2px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        
+        .table-button:hover {
+            background-color: var(--background-hover);
+        }
+        
+        .schema-tables {
+            padding-left: var(--space-md);
+            margin-top: var(--space-xs);
+        }
+        
+        .table-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .table-item {
+            margin-bottom: 2px;
+        }
+        
+        .table-button {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            padding: 2px 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        
+        .table-button:hover {
+            background-color: var(--background-hover);
+        }
+        
+        /* Connection bar styles */
+        .connection-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-sm) var(--space-md);
+            margin-bottom: var(--space-md);
+            background-color: var(--background-darker);
+            border-radius: var(--card-border-radius);
+            border: 1px solid var(--border-color);
+        }
+        
+        .connection-info {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+        }
+        
+        .connection-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .connection-value {
+            background-color: var(--background-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+        
+        /* Status indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-default {
+            background-color: #6c757d;
+        }
+        
+        .status-default {
+            background-color: #6c757d;
+        }
+        
+        .status-pending {
+            background-color: #ffc107;
+        }
+        
+        .status-running {
+            background-color: #28a745;
+        }
+        
+        .status-failed {
+            background-color: #dc3545;
+        }
+        
+        /* Query results styles */
+        .loading-container, .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+            gap: var(--space-md);
+        }
+        
+        .error-container svg {
+            color: var(--danger-color);
+        }
+        
+        /* Query results styles */
+        .loading-container, .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+            gap: var(--space-md);
+        }
+        
+        .error-container svg {
+            color: var(--danger-color);
+        }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: var(--background-light);
+            margin: 10% auto;
+            padding: var(--space-md);
+            border-radius: var(--card-border-radius);
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-md);
+        }
+        
+        .modal-title {
+            margin: 0;
+        }
+        
+        .modal-body {
+            margin-bottom: var(--space-md);
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-sm);
+        }
+        
+        /* Form styles */
+        .form-group {
+            margin-bottom: var(--space-md);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: var(--space-sm);
+            border: 1px solid var(--border-color);
+            border-radius: var(--card-border-radius);
+            background-color: var(--background-light);
+            color: var(--text-primary);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        /* Utility classes */
+        .d-none {
+            display: none !important;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-danger {
+            color: var(--danger-color);
+        }
+        
+        .text-muted {
+            color: var(--text-secondary);
+        }
+        
+        .mt-md {
+            margin-top: var(--space-md);
+        }
+        
+        .p-lg {
+            padding: var(--space-lg);
+        }
+        
+        .p-md {
+            padding: var(--space-md);
+        }
+        
+        .mb-md {
+            margin-bottom: var(--space-md);
+        }
+        
+        .results-scroll-container {
+            overflow: auto;
+            max-height: calc(100% - 40px); /* Adjust based on your header height */
+            width: 100%;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: fit-content; /* Ensures table can expand beyond container */
+        }
+
+        .data-table th, 
+        .data-table td {
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--border-color);
+            text-align: left;
+            white-space: nowrap; /* Prevents text wrapping */
+        }
+
+        .data-table th {
+            background-color: var(--background-darker);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        /* Make sure the card body doesn't add extra padding that would limit scrolling */
+        .card-body {
+            padding: 0 !important;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Adjust the query results container */
+        .query-results {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Ensure the table header stays fixed while scrolling vertically */
+        .data-table thead {
+            position: sticky;
+            top: 0;
+            background-color: var(--background-light);
+            z-index: 2;
+        }
+        
+        .results-scroll-container {
+            scroll-behavior: smooth;
+        }
+
+        /* Scrollbar styling */
+        .results-scroll-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .results-scroll-container::-webkit-scrollbar-track {
+            background: var(--background-light);
+        }
+
+        .results-scroll-container::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .results-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Make responsive for smaller screens */
+        @media (max-width: 768px) {
+            .query-tool-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .sidebar-panel {
+                width: 100%;
+                height: 300px;
+                margin-bottom: var(--space-md);
+            }
+            
+            .connection-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }    
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Core dependencies
+pandas
+numpy
+boto3
+botocore
+elasticsearch==9.0.1
+kafka-python
+jsonschema
+pyarrow
+fastjsonschema
+requests
+
+# ML dependencies
+# dm-tree
+# scipy
+# h5py
+# tensorflow==2.13.1
+# keras==2.13.1
+# numpy==1.24.3

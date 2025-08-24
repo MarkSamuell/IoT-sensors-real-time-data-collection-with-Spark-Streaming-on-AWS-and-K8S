@@ -1,0 +1,70 @@
+{
+  "schemaName": "sevs_schema",
+  "dataFormat": "JSON",
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "ID": {"type": "string"},
+        "IoC": {
+          "type": "object",
+          "properties": {
+            "Parameters": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Timestamp": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[9-9]\\d{11}|[1-2]\\d{12}$"
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 946684800000,
+                        "maximum": 2524608000000
+                      }
+                    ],
+                    "description": "Epoch timestamp in milliseconds (representing dates from 2000-01-01 to 2050-01-01)"
+                  },
+                  "InternalParameter": {
+                    "type": "object",
+                    "properties": {
+                      "ParameterName": {"type": "string"},
+                      "ParameterType": {"type": "string"},
+                      "ParameterValue": {"type": "string"},
+                      "ParameterUnit": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "NetworkID": {"type": "string"},
+        "NetworkType": {"type": "string"},
+        "Origin": {"type": "string"},
+        "SEV_Msg": {"type": "string"},
+        "Severity": {"type": "string"},
+        "Timestamp": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[9-9]\\d{11}|[1-2]\\d{12}$"
+            },
+            {
+              "type": "number",
+              "minimum": 946684800000,
+              "maximum": 2524608000000
+            }
+          ],
+          "description": "Epoch timestamp in milliseconds (representing dates from 2000-01-01 to 2050-01-01)"
+        },
+        "VinNumber": {"type": "string"}
+      },
+      "required": ["ID", "Timestamp", "VinNumber"]
+    }
+  }
+}

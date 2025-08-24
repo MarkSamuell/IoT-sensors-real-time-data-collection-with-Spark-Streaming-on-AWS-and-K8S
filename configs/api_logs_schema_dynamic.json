@@ -1,0 +1,88 @@
+{
+  "type": "object",
+  "properties": {
+    "ID": {
+      "type": "integer",
+      "description": "Unique request identifier"
+    },
+    "Request Data": {
+      "type": "object",
+      "properties": {
+        "Source IP": {
+          "type": "string",
+          "description": "Source IP address of the request"
+        },
+        "Method": {
+          "type": "string",
+          "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"],
+          "description": "HTTP method"
+        },
+        "Service Port": {
+          "type": "integer",
+          "description": "Service port number"
+        },
+        "Agent ID": {
+          "type": "string",
+          "description": "Agent identifier"
+        },
+        "Path": {
+          "type": "string",
+          "description": "API endpoint path"
+        },
+        "Campaign ID": {
+          "type": "string",
+          "description": "Campaign identifier"
+        },
+        "requested_details": {
+          "type": "object",
+          "properties": {
+            "Body": {
+              "type": "object",
+              "description": "Request body data"
+            },
+            "Query Params": {
+              "type": "object",
+              "description": "Query parameters"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "required": ["Source IP", "Method", "Path", "Campaign ID"],
+      "additionalProperties": true
+    },
+    "Response Data": {
+      "type": "object",
+      "properties": {
+        "Response Data": {
+          "type": "object",
+          "properties": {
+            "status_code": {
+              "type": "integer",
+              "description": "HTTP response status code"
+            },
+            "headers": {
+              "type": "object",
+              "description": "Response headers"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "sevs": {
+      "type": "array",
+      "items": {
+        "type": "integer"
+      },
+      "description": "Array of security event IDs"
+    },
+    "Timestamp": {
+      "type": "integer",
+      "description": "Unix timestamp in milliseconds"
+    }
+  },
+  "required": ["ID", "Request Data", "Timestamp"],
+  "additionalProperties": true
+}

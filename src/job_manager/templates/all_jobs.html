@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Jobs - {{ cluster_details.Name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12H4.5a2.5 2.5 0 0 1 0-5H9"></path>
+                    <path d="M15 12h4.5a2.5 2.5 0 0 0 0-5H15"></path>
+                    <line x1="9" y1="12" x2="15" y2="12"></line>
+                    <line x1="9" y1="17" x2="15" y2="17"></line>
+                    <line x1="12" y1="12" x2="12" y2="17"></line>
+                </svg>
+                EMR Job Manager
+            </div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item" id="dashboard-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    Dashboard
+                </li>
+                <li class="sidebar-menu-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="12" x2="16" y2="12"></line>
+                        <line x1="16" y1="12" x2="14" y2="15"></line>
+                        <line x1="10" y1="15" x2="8" y2="12"></line>
+                        <line x1="2" y1="12" x2="8" y2="12"></line>
+                    </svg>
+                    All Jobs
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                Job Manager v1.0.0
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Header -->
+                <div class="main-header d-flex justify-between align-center">
+                    <div>
+                        <div class="breadcrumb">
+                            <a href="{{ url_for('index') }}">Dashboard</a>
+                            <span class="breadcrumb-separator">/</span>
+                            <span>All Jobs</span>
+                        </div>
+                        <h1 class="page-title">
+                            Jobs for Cluster: {{ cluster_details.Name }} 
+                            <span class="text-muted">({{ cluster_id }})</span>
+                        </h1>
+                    </div>
+                    <div>
+                        <button id="new-job-btn" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            New Job
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cluster Information Card -->
+                <div class="card mb-lg">
+                    <div class="card-header">
+                        <h2 class="card-title">Cluster Details</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-title">Cluster ID</div>
+                                <div class="stat-value">{{ cluster_id }}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">Name</div>
+                                <div class="stat-value">{{ cluster_details.Name }}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">Status</div>
+                                <div class="stat-value">
+                                    <span class="status-indicator 
+                                        {% if cluster_details.Status.State == 'RUNNING' %}status-running
+                                        {% elif cluster_details.Status.State == 'WAITING' %}status-pending
+                                        {% elif cluster_details.Status.State == 'TERMINATED' %}status-completed
+                                        {% else %}status-warning{% endif %}">
+                                        {{ cluster_details.Status.State }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Tabs Navigation -->
+                <div class="tab-navigation mb-md">
+                    <button class="tab-btn active" data-tab="all-jobs">All Jobs</button>
+                    <button class="tab-btn" data-tab="running-jobs">Running</button>
+                    <button class="tab-btn" data-tab="completed-jobs">Completed</button>
+                    <button class="tab-btn" data-tab="failed-jobs">Failed</button>
+                </div>
+
+                <!-- Jobs Tabs Content -->
+                <div class="tab-content">
+                    <!-- All Jobs Tab -->
+                    <div id="all-jobs" class="tab-pane active">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">All Jobs</h2>
+                                <span class="badge badge-info">{{ steps|length }}</span>
+                            </div>
+                            <div class="card-body">
+                                {% if steps %}
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Step ID</th>
+                                                <th>Name</th>
+                                                <th>Status</th>
+                                                <th>Started</th>
+                                                <th>Ended</th>
+                                                <th>Duration</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for step in steps %}
+                                            <tr>
+                                                <td>{{ step.Id }}</td>
+                                                <td>{{ step.Name }}</td>
+                                                <td>
+                                                    <span class="status-indicator 
+                                                        {% if step.Status.State == 'RUNNING' %}status-running
+                                                        {% elif step.Status.State == 'COMPLETED' %}status-completed
+                                                        {% elif step.Status.State == 'FAILED' %}status-failed
+                                                        {% elif step.Status.State == 'CANCELLED' %}status-warning
+                                                        {% else %}status-pending{% endif %}">
+                                                        {{ step.Status.State }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {{ step.Status.Timeline.StartDateTime.strftime('%Y-%m-%d %H:%M:%S') 
+                                                       if step.Status.Timeline.StartDateTime else 'N/A' }}
+                                                </td>
+                                                <td>
+                                                    {{ step.Status.Timeline.EndDateTime.strftime('%Y-%m-%d %H:%M:%S') 
+                                                       if step.Status.Timeline.EndDateTime else 'N/A' }}
+                                                </td>
+                                                <td>
+                                                    {% if step.Status.Timeline.StartDateTime and step.Status.Timeline.EndDateTime %}
+                                                        {% set duration = (step.Status.Timeline.EndDateTime - step.Status.Timeline.StartDateTime).total_seconds() %}
+                                                        {% if duration < 60 %}
+                                                            {{ duration|int }} seconds
+                                                        {% elif duration < 3600 %}
+                                                            {{ (duration / 60)|int }} minutes {{ (duration % 60)|int }} seconds
+                                                        {% else %}
+                                                            {{ (duration / 3600)|int }} hours {{ ((duration % 3600) / 60)|int }} minutes
+                                                        {% endif %}
+                                                    {% else %}
+                                                        N/A
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex gap-sm">
+                                                        <button class="btn btn-secondary btn-sm details-btn" 
+                                                                data-cluster-id="{{ cluster_id }}" 
+                                                                data-step-id="{{ step.Id }}">
+                                                            Details
+                                                        </button>
+                                                        {% if step.Status.State in ['RUNNING', 'PENDING'] %}
+                                                        <form action="{{ url_for('stop_job') }}" method="post" class="stop-job-form">
+                                                            <input type="hidden" name="step_id" value="{{ step.Id }}">
+                                                            <input type="hidden" name="cluster_id" value="{{ cluster_id }}">
+                                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                                Stop
+                                                            </button>
+                                                        </form>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="data-table-empty">
+                                    <div class="text-center mb-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                        </svg>
+                                    </div>
+                                    <p class="text-center text-muted">No jobs found for this cluster.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- Running Jobs Tab -->
+                    <div id="running-jobs" class="tab-pane">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Running Jobs</h2>
+                                <span class="badge badge-warning">
+                                    {{ steps|selectattr('Status.State', 'in', ['RUNNING', 'PENDING'])|list|length }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                {% set running_steps = steps|selectattr('Status.State', 'in', ['RUNNING', 'PENDING'])|list %}
+                                {% if running_steps %}
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Step ID</th>
+                                                <th>Name</th>
+                                                <th>Started</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for step in running_steps %}
+                                            <tr>
+                                                <td>{{ step.Id }}</td>
+                                                <td>{{ step.Name }}</td>
+                                                <td>
+                                                    {{ step.Status.Timeline.StartDateTime.strftime('%Y-%m-%d %H:%M:%S') 
+                                                       if step.Status.Timeline.StartDateTime else 'N/A' }}
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex gap-sm">
+                                                        <form action="{{ url_for('stop_job') }}" method="post" class="stop-job-form">
+                                                            <input type="hidden" name="step_id" value="{{ step.Id }}">
+                                                            <input type="hidden" name="cluster_id" value="{{ cluster_id }}">
+                                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                                Stop
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="data-table-empty">
+                                    <div class="text-center mb-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                    </div>
+                                    <p class="text-center text-muted">No running jobs at the moment.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- Completed Jobs Tab -->
+                    <div id="completed-jobs" class="tab-pane">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Completed Jobs</h2>
+                                <span class="badge badge-success">
+                                    {{ steps|selectattr('Status.State', 'equalto', 'COMPLETED')|list|length }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                {% set completed_steps = steps|selectattr('Status.State', 'equalto', 'COMPLETED')|list %}
+                                {% if completed_steps %}
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Step ID</th>
+                                                <th>Name</th>
+                                                <th>Started</th>
+                                                <th>Ended</th>
+                                                <th>Duration</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for step in completed_steps %}
+                                            <tr>
+                                                <td>{{ step.Id }}</td>
+                                                <td>{{ step.Name }}</td>
+                                                <td>
+                                                    {{ step.Status.Timeline.StartDateTime.strftime('%Y-%m-%d %H:%M:%S') 
+                                                       if step.Status.Timeline.StartDateTime else 'N/A' }}
+                                                </td>
+                                                <td>
+                                                    {{ step.Status.Timeline.EndDateTime.strftime('%Y-%m-%d %H:%M:%S') 
+                                                       if step.Status.Timeline.EndDateTime else 'N/A' }}
+                                                </td>
+                                                <td>
+                                                    {% if step.Status.Timeline.StartDateTime and step.Status.Timeline.EndDateTime %}
+                                                        {% set duration = (step.Status.Timeline.EndDateTime - step.Status.Timeline.StartDateTime).total_seconds() %}
+                                                        {% if duration < 60 %}
+                                                            {{ duration|int }} seconds
+                                                        {% elif duration < 3600 %}
+                                                            {{ (duration / 60)|int }} minutes {{ (duration % 60)|int }} seconds
+                                                        {% else %}
+                                                            {{ (duration / 3600)|int }} hours {{ ((duration % 3600) / 60)|int }} minutes
+                                                        {% endif %}
+                                                    {% else %}
+                                                        N/A
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="data-table-empty">
+                                    <div class="text-center mb-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                        </svg>
+                                    </div>
+                                    <p class="text-center text-muted">No completed jobs found.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+        
+                    <!-- Failed Jobs Tab -->
+                    <div id="failed-jobs" class="tab-pane">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Failed Jobs</h2>
+                                <span class="badge badge-danger">
+                                    {{ steps|selectattr('Status.State', 'in', ['FAILED', 'CANCELLED'])|list|length }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                {% set failed_steps = steps|selectattr('Status.State', 'in', ['FAILED', 'CANCELLED'])|list %}
+                                {% if failed_steps %}
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Step ID</th>
+                                                <th>Name</th>
+                                                <th>Status</th>
+                                                <th>Started</th>
+                                                <th>Ended</th>
+                                                <th>Duration</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for step in failed_steps %}
+                                            <tr>
+                                                <td>{{ step.Id }}</td>
+                                                <td>{{ step.Name }}</td>
+                                                <td>
+                                                    <span class="status-indicator 
+                                                        {% if step.Status.State == 'FAILED' %}status-failed
+                                                        {% else %}status-warning{% endif %}">
+                                                        {{ step.Status.State }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {{ step.Status.Timeline.StartDateTime.strftime('%Y-%m-%d %H:%M:%S') 
+                                                       if step.Status.Timeline.StartDateTime else 'N/A' }}
+                                                </td>
+                                                <td>
+                                                    {{ step.Status.Timeline.EndDateTime.strftime('%Y-%m-%d %H:%M:%S') 
+                                                       if step.Status.Timeline.EndDateTime else 'N/A' }}
+                                                </td>
+                                                <td>
+                                                    {% if step.Status.Timeline.StartDateTime and step.Status.Timeline.EndDateTime %}
+                                                        {% set duration = (step.Status.Timeline.EndDateTime - step.Status.Timeline.StartDateTime).total_seconds() %}
+                                                        {% if duration < 60 %}
+                                                            {{ duration|int }} seconds
+                                                        {% elif duration < 3600 %}
+                                                            {{ (duration / 60)|int }} minutes {{ (duration % 60)|int }} seconds
+                                                        {% else %}
+                                                            {{ (duration / 3600)|int }} hours {{ ((duration % 3600) / 60)|int }} minutes
+                                                        {% endif %}
+                                                    {% else %}
+                                                        N/A
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="data-table-empty">
+                                    <div class="text-center mb-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                    </div>
+                                    <p class="text-center text-muted">No failed jobs found.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Job Details Modal -->
+    <div id="job-details-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Job Details</h2>
+                <button class="btn-icon close-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="job-details-content">
+                    <!-- Job details will be dynamically populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab navigation
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+        
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons and panes
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+        
+                    // Add active class to clicked button and corresponding pane
+                    this.classList.add('active');
+                    document.getElementById(this.getAttribute('data-tab')).classList.add('active');
+                });
+            });
+        
+            // Set up details buttons for job details page navigation
+            document.querySelectorAll('.details-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const clusterId = this.getAttribute('data-cluster-id');
+                    const stepId = this.getAttribute('data-step-id');
+                    window.location.href = `/job_details/${clusterId}/${stepId}`;
+                });
+            });
+        
+            // Job details modal
+            const jobDetailsModal = document.getElementById('job-details-modal');
+            const jobDetailsContent = document.getElementById('job-details-content');
+            const closeModalButtons = document.querySelectorAll('.close-modal');
+        
+            // Close modal functionality
+            closeModalButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    jobDetailsModal.style.display = 'none';
+                });
+            });
+        
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === jobDetailsModal) {
+                    jobDetailsModal.style.display = 'none';
+                }
+            });
+        
+            // Setup stop job confirmation
+            document.querySelectorAll('.stop-job-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const stepId = this.querySelector('input[name="step_id"]').value;
+                    const clusterId = this.querySelector('input[name="cluster_id"]').value;
+                    
+                    if (!confirm(`Are you sure you want to stop the job with Step ID ${stepId} on cluster ${clusterId}?\n\nWarning: This will terminate the running job.`)) {
+                        e.preventDefault();
+                    }
+                });
+            });
+        
+            // Dashboard navigation
+            const dashboardNav = document.getElementById('dashboard-nav');
+            if (dashboardNav) {
+                dashboardNav.addEventListener('click', function() {
+                    window.location.href = "{{ url_for('index') }}";
+                });
+            }
+        
+            // New job button
+            const newJobBtn = document.getElementById('new-job-btn');
+            if (newJobBtn) {
+                newJobBtn.addEventListener('click', function() {
+                    window.location.href = "{{ url_for('submit_job') }}";
+                });
+            }
+        });
+    </script>
+
+    <style>
+    /* Modal Styles */
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background-color: var(--background-light);
+        border-radius: var(--card-border-radius);
+        width: 100%;
+        max-width: 600px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+        padding: var(--space-md);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .modal-body {
+        padding: var(--space-md);
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+
+    .modal-footer {
+        padding: var(--space-md);
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-sm);
+    }
+
+    .job-details-grid {
+        display: grid;
+        gap: var(--space-sm);
+    }
+
+    .detail-row {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: var(--space-sm);
+    }
+
+    .detail-label {
+        flex: 0 0 40%;
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .detail-value {
+        flex: 0 0 60%;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .detail-row {
+            flex-direction: column;
+        }
+
+        .detail-label {
+            margin-bottom: var(--space-xs);
+        }
+    }
+
+    /* Tab Navigation Styles */
+    .tab-navigation {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: var(--space-md);
+    }
+
+    .tab-btn {
+        flex: 1;
+        padding: var(--space-sm) var(--space-md);
+        text-align: center;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .tab-btn:hover {
+        background-color: var(--background-hover);
+        color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+        color: var(--accent-color);
+        border-bottom-color: var(--accent-color);
+    }
+
+    .tab-pane {
+        display: none;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+    </style>
+</body>
+</html>

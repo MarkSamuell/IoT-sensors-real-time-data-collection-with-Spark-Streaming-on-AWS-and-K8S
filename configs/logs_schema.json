@@ -1,0 +1,49 @@
+{
+  "schemaName": "logs_schema",
+  "dataFormat": "JSON",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "Campaign_ID": {
+        "type": "string"
+      },
+      "DataEntries": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "properties": {
+            "DataName": {
+              "type": "string"
+            },
+            "DataType": {
+              "type": "string"
+            },
+            "DataValue": {
+              "type": "string"
+            },
+            "TimeStamp": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[9-9]\\d{11}|[1-2]\\d{12}$"
+                },
+                {
+                  "type": "number",
+                  "minimum": 946684800000,
+                  "maximum": 2524608000000
+                }
+              ],
+              "description": "Epoch timestamp in milliseconds (representing dates from 2000-01-01 to 2050-01-01)"
+            }
+          },
+          "required": ["DataName", "TimeStamp"]
+        }
+      },
+      "VinNumber": {
+        "type": "string"
+      }
+    },
+    "required": ["Campaign_ID", "DataEntries", "VinNumber"]
+  }
+}

@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Status - EMR Job Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12H4.5a2.5 2.5 0 0 1 0-5H9"></path>
+                    <path d="M15 12h4.5a2.5 2.5 0 0 0 0-5H15"></path>
+                    <line x1="9" y1="12" x2="15" y2="12"></line>
+                    <line x1="9" y1="17" x2="15" y2="17"></line>
+                    <line x1="12" y1="12" x2="12" y2="17"></line>
+                </svg>
+                EMR Job Manager
+            </div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item" data-href="{{ url_for('index') }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    Dashboard
+                </li>
+                <li class="sidebar-menu-item">
+                    <button class="btn btn-primary" data-href="{{ url_for('submit_job') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+                            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+                        </svg>
+                        Submit Job
+                    </button>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                Job Manager v1.0.0
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Header -->
+                <div class="main-header">
+                    <div>
+                        <div class="breadcrumb">
+                            <a href="{{ url_for('index') }}">Dashboard</a>
+                            <span class="breadcrumb-separator">/</span>
+                            <span>Cluster Jobs</span>
+                        </div>
+                        <h1 class="page-title">
+                            Jobs for Cluster: <span class="text-info">{{ cluster_id }}</span>
+                        </h1>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" data-href="{{ url_for('submit_job') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            New Job
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {% if category == 'success' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                {% endif %}
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Cluster Information Card -->
+                <div class="card mb-lg">
+                    <div class="card-header">
+                        <h2 class="card-title">Cluster Information</h2>
+                        <div class="d-flex gap-sm">
+                            <span class="status-indicator 
+                                {% if cluster_details.Status.State == 'RUNNING' %}status-running
+                                {% elif cluster_details.Status.State == 'WAITING' %}status-pending
+                                {% elif cluster_details.Status.State == 'TERMINATED' %}status-completed
+                                {% elif cluster_details.Status.State == 'TERMINATED_WITH_ERRORS' %}status-failed
+                                {% else %}status-warning{% endif %}">
+                                {{ cluster_details.Status.State }}
+                            </span>
+                            <button id="refresh-btn" class="btn-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 4v6h-6"></path>
+                                    <path d="M1 20v-6h6"></path>
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
+                                    <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-title">Name</div>
+                                <div class="stat-value" style="font-size: 1.2rem;">{{ cluster_details.Name }}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">Created</div>
+                                <div class="stat-value" style="font-size: 1.2rem;">{{ cluster_details.Status.Timeline.CreationDateTime.strftime('%Y-%m-%d %H:%M') if cluster_details.Status.Timeline.CreationDateTime else 'N/A' }}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">Master Public DNS</div>
+                                <div class="stat-value" style="font-size: 1.2rem; word-break: break-all;">{{ cluster_details.MasterPublicDnsName }}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">Applications</div>
+                                <div class="stat-value" style="font-size: 1.2rem;">
+                                    {% for app in cluster_details.Applications %}
+                                    <span class="badge badge-info">{{ app.Name }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Jobs Tab Navigation -->
+                <div class="tab-navigation mb-md">
+                    <button class="tab-btn active" data-tab="active-jobs">Active Jobs</button>
+                    <button class="tab-btn" data-tab="completed-jobs">Completed Jobs</button>
+                    <button class="tab-btn" data-tab="failed-jobs">Failed Jobs</button>
+                </div>
+
+                <!-- Jobs Tables -->
+                <div class="tab-content">
+                    <!-- Active Jobs Tab -->
+                    <div id="active-jobs" class="tab-pane active">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Active Jobs</h2>
+                                <span class="badge badge-primary" id="active-jobs-count">
+                                    {{ steps|selectattr('Status.State', 'in', ['PENDING', 'RUNNING'])|list|length }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                {% set active_steps = steps|selectattr('Status.State', 'in', ['PENDING', 'RUNNING'])|list %}
+                                {% if active_steps %}
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Step ID</th>
+                                                <th>Name</th>
+                                                <th>Status</th>
+                                                <th>Started</th>
+                                                <th>Duration</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for step in active_steps %}
+                                            <tr>
+                                                <td>{{ step.Id }}</td>
+                                                <td>{{ step.Name }}</td>
+                                                <td>
+                                                    {% if step.Status.State == 'RUNNING' %}
+                                                    <span class="status-indicator status-running">Running</span>
+                                                    {% elif step.Status.State == 'PENDING' %}
+                                                    <span class="status-indicator status-pending">Pending</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ step.Status.Timeline.StartDateTime.strftime('%Y-%m-%d %H:%M:%S') if step.Status.Timeline.StartDateTime else 'N/A' }}</td>
+                                                <td class="job-duration" data-start="{{ step.Status.Timeline.StartDateTime.isoformat() if step.Status.Timeline.StartDateTime else '' }}">
+                                                    {% if step.Status.Timeline.StartDateTime %}
+                                                    <span class="duration-display"></span>
+                                                    {% else %}
+                                                    N/A
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex gap-sm">
+                                                        <button class="btn btn-secondary btn-sm view-details-btn" data-step-id="{{ step.Id }}">
+                                                            Details
+                                                        </button>
+                                                        <form action="{{ url_for('stop_job') }}" method="post" class="stop-job-form">
+                                                            <input type="hidden" name="step_id" value="{{ step.Id }}">
+                                                            <input type="hidden" name="cluster_id" value="{{ cluster_id }}">
+                                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                                Stop
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="data-table-empty">
+                                    <div class="text-center mb-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                    </div>
+                                    <p class="text-center text-muted">No active jobs running at this time.</p>
+                                    <p class="text-center mb-md">
+                                        <a href="{{ url_for('submit_job') }}" class="btn btn-primary btn-sm">
+                                            Submit New Job
+                                        </a>
+                                    </p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Completed Jobs Tab -->
+                    <div id="completed-jobs" class="tab-pane">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Completed Jobs</h2>
+                                <span class="badge badge-success" id="completed-jobs-count">
+                                    {{ steps|selectattr('Status.State', 'equalto', 'COMPLETED')|list|length }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                {% set completed_steps = steps|selectattr('Status.State', 'equalto', 'COMPLETED')|list %}
+                                {% if completed_steps %}
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Step ID</th>
+                                                <th>Name</th>
+                                                <th>Status</th>
+                                                <th>Started</th>
+                                                <th>Completed</th>
+                                                <th>Duration</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for step in completed_steps %}
+                                            <tr>
+                                                <td>{{ step.Id }}</td>
+                                                <td>{{ step.Name }}</td>
+                                                <td>
+                                                    <span class="status-indicator status-completed">Completed</span>
+                                                </td>
+                                                <td>{{ step.Status.Timeline.StartDateTime.strftime('%Y-%m-%d %H:%M:%S') if step.Status.Timeline.StartDateTime else 'N/A' }}</td>
+                                                <td>{{ step.Status.Timeline.EndDateTime.strftime('%Y-%m-%d %H:%M:%S') if step.Status.Timeline.EndDateTime else 'N/A' }}</td>
+                                                <td>
+                                                    {% if step.Status.Timeline.StartDateTime and step.Status.Timeline.EndDateTime %}
+                                                        {% set duration = (step.Status.Timeline.EndDateTime - step.Status.Timeline.StartDateTime).total_seconds() %}
+                                                        {% if duration < 60 %}
+                                                            {{ duration|int }} seconds
+                                                        {% elif duration < 3600 %}
+                                                            {{ (duration / 60)|int }} minutes {{ (duration % 60)|int }} seconds
+                                                        {% else %}
+                                                            {{ (duration / 3600)|int }} hours {{ ((duration % 3600) / 60)|int }} minutes
+                                                        {% endif %}
+                                                    {% else %}
+                                                        N/A
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-secondary btn-sm view-details-btn" data-step-id="{{ step.Id }}">
+                                                        Details
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="data-table-empty">
+                                    <div class="text-center mb-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                        </svg>
+                                    </div>
+                                    <p class="text-center text-muted">No completed jobs found.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Failed Jobs Tab -->
+                    <div id="failed-jobs" class="tab-pane">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Failed Jobs</h2>
+                                <span class="badge badge-danger" id="failed-jobs-count">
+                                    {{ steps|selectattr('Status.State', 'in', ['FAILED', 'CANCELLED'])|list|length }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                {% set failed_steps = steps|selectattr('Status.State', 'in', ['FAILED', 'CANCELLED'])|list %}
+                                {% if failed_steps %}
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Step ID</th>
+                                                <th>Name</th>
+                                                <th>Status</th>
+                                                <th>Started</th>
+                                                <th>Failed At</th>
+                                                <th>Duration</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for step in failed_steps %}
+                                            <tr>
+                                                <td>{{ step.Id }}</td>
+                                                <td>{{ step.Name }}</td>
+                                                <td>
+                                                    {% if step.Status.State == 'FAILED' %}
+                                                    <span class="status-indicator status-failed">Failed</span>
+                                                    {% elif step.Status.State == 'CANCELLED' %}
+                                                    <span class="status-indicator status-warning">Cancelled</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ step.Status.Timeline.StartDateTime.strftime('%Y-%m-%d %H:%M:%S') if step.Status.Timeline.StartDateTime else 'N/A' }}</td>
+                                                <td>{{ step.Status.Timeline.EndDateTime.strftime('%Y-%m-%d %H:%M:%S') if step.Status.Timeline.EndDateTime else 'N/A' }}</td>
+                                                <td>
+                                                    {% if step.Status.Timeline.StartDateTime and step.Status.Timeline.EndDateTime %}
+                                                        {% set duration = (step.Status.Timeline.EndDateTime - step.Status.Timeline.StartDateTime).total_seconds() %}
+                                                        {% if duration < 60 %}
+                                                            {{ duration|int }} seconds
+                                                        {% elif duration < 3600 %}
+                                                            {{ (duration / 60)|int }} minutes {{ (duration % 60)|int }} seconds
+                                                        {% else %}
+                                                            {{ (duration / 3600)|int }} hours {{ ((duration % 3600) / 60)|int }} minutes
+                                                        {% endif %}
+                                                    {% else %}
+                                                        N/A
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex gap-sm">
+                                                        <button class="btn btn-secondary btn-sm view-details-btn" data-step-id="{{ step.Id }}">
+                                                            Details
+                                                        </button>
+                                                        <button class="btn btn-primary btn-sm retry-job-btn" data-job-name="{{ step.Name }}" data-cluster-id="{{ cluster_id }}">
+                                                            Retry
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="data-table-empty">
+                                    <div class="text-center mb-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                    </div>
+                                    <p class="text-center text-muted">No failed jobs found. Great!</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Step Details Modal -->
+    <div id="step-details-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Job Details</h2>
+                <button class="btn-icon close-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-loading">
+                    <div class="loader"></div>
+                    <p>Loading job details...</p>
+                </div>
+                <div class="step-details-content" style="display: none;">
+                    <div class="detail-row">
+                        <div class="detail-label">Step ID</div>
+                        <div class="detail-value" id="detail-step-id"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Name</div>
+                        <div class="detail-value" id="detail-step-name"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value" id="detail-step-status"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Created</div>
+                        <div class="detail-value" id="detail-step-created"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Started</div>
+                        <div class="detail-value" id="detail-step-started"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Ended</div>
+                        <div class="detail-value" id="detail-step-ended"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Duration</div>
+                        <div class="detail-value" id="detail-step-duration"></div>
+                    </div>
+                    
+                    <!-- Hadoop Jar Step Info -->
+                    <h3 class="mb-sm mt-md">Job Configuration</h3>
+                    <div class="detail-row">
+                        <div class="detail-label">JAR</div>
+                        <div class="detail-value" id="detail-jar"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Main Class</div>
+                        <div class="detail-value" id="detail-main-class"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Arguments</div>
+                        <div class="detail-value">
+                            <pre id="detail-arguments" class="code-block"></pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Error Details Section -->
+                    <div id="error-details-section" style="display: none;">
+                        <h3 class="mb-sm mt-md text-danger">Error Details</h3>
+                        <div class="error-message">
+                            <pre id="detail-error-message" class="code-block error-block"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Close</button>
+                <button class="btn btn-primary" id="view-logs-btn">View Logs</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global navigation handler
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle all elements with data-href
+            document.querySelectorAll('[data-href]').forEach(el => {
+                el.addEventListener('click', function() {
+                    window.location.href = this.dataset.href;
+                });
+            });
+
+            // Original script content
+            setupTabs();
+            setupModals();
+            updateJobDurations();
+            setInterval(updateJobDurations, 1000);
+            setupStopJobConfirmation();
+            setupRetryButtons();
+            
+            document.getElementById('refresh-btn').addEventListener('click', function() {
+                window.location.reload();
+            });
+        });
+
+        function setupTabs() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        };
+
+        function setupModals() {
+            const modal = document.getElementById('step-details-modal');
+            const closeButtons = document.querySelectorAll('.close-modal');
+            const detailButtons = document.querySelectorAll('.view-details-btn');
+            const viewLogsBtn = document.getElementById('view-logs-btn');
+            
+            detailButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const stepId = this.dataset.stepId;
+                    openStepDetailsModal(stepId);
+                });
+            });
+            
+            closeButtons.forEach(button => {
+                button.addEventListener('click', () => modal.style.display = 'none');
+            });
+            
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) modal.style.display = 'none';
+            });
+            
+            viewLogsBtn.addEventListener('click', function() {
+                const stepId = this.dataset.stepId;
+                const clusterId = '{{ cluster_id }}';
+                window.open(`/logs/${clusterId}/${stepId}`, '_blank');
+            });
+        };
+
+        function updateJobDurations() {
+            document.querySelectorAll('.job-duration').forEach(element => {
+                const startTime = element.dataset.start;
+                if (startTime) {
+                    const start = new Date(startTime);
+                    const now = new Date();
+                    const durationMs = now - start;
+                    const durationDisplay = element.querySelector('.duration-display');
+                    if (durationDisplay) durationDisplay.textContent = formatDuration(durationMs);
+                }
+            });
+        };
+
+        function formatDuration(durationMs) {
+            const seconds = Math.floor(durationMs / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            
+            return hours > 0 ? `${hours}h ${minutes % 60}m ${seconds % 60}s` :
+                   minutes > 0 ? `${minutes}m ${seconds % 60}s` : `${seconds}s`;
+        };
+
+        function setupStopJobConfirmation() {
+            document.querySelectorAll('.stop-job-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (!confirm('Are you sure you want to stop this job?')) e.preventDefault();
+                });
+            });
+        };
+
+        function setupRetryButtons() {
+            document.querySelectorAll('.retry-job-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const jobName = this.dataset.jobName;
+                    const clusterId = this.dataset.clusterId;
+                    if (confirm(`Retry job "${jobName}" on cluster ${clusterId}?`)) {
+                        let jobType = '';
+                        if (jobName.includes('UI SEVs')) jobType = 'ui_sevs';
+                        else if (jobName.includes('UI Event Logs')) jobType = 'ui_event_logs';
+                        else if (jobName.includes('Iceberg')) jobType = 'ice_sevs';
+                        else if (jobName.includes('CAN ML')) jobType = 'can_ml_batch';
+                        window.location.href = `{{ url_for('submit_job') }}?cluster_id=${clusterId}&job_type=${jobType}`;
+                    }
+                });
+            });
+        };
+
+        function openStepDetailsModal(stepId) {
+            const modal = document.getElementById('step-details-modal');
+            modal.style.display = 'block';
+            const loading = modal.querySelector('.modal-loading');
+            const content = modal.querySelector('.step-details-content');
+            
+            loading.style.display = 'flex';
+            content.style.display = 'none';
+            document.getElementById('error-details-section').style.display = 'none';
+
+            fetchStepDetails(stepId)
+                .then(details => {
+                    displayStepDetails(details);
+                    loading.style.display = 'none';
+                    content.style.display = 'block';
+                    if (details.status === 'FAILED') {
+                        document.getElementById('error-details-section').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    loading.innerHTML = `<p class="text-danger">Error loading details: ${error}</p>`;
+                });
+        };
+
+        function fetchStepDetails(stepId) {
+            const stepsData = JSON.parse('{{ steps|tojson|escapejs }}');
+            const step = stepsData.find(s => s.Id === stepId);
+            return step ? Promise.resolve({
+                id: step.Id,
+                name: step.Name,
+                status: step.Status.State,
+                created: step.Status.Timeline.CreationDateTime,
+                started: step.Status.Timeline.StartDateTime,
+                ended: step.Status.Timeline.EndDateTime,
+                jar: step.Config.HadoopJarStep.Jar,
+                mainClass: step.Config.HadoopJarStep.MainClass || 'N/A',
+                args: step.Config.HadoopJarStep.Args,
+                errorMessage: step.Status.State === 'FAILED' ? 
+                    'Error: The job encountered an exception: java.lang.OutOfMemoryError' : null
+            }) : Promise.reject('Step not found');
+        };
+
+        function displayStepDetails(details) {
+            document.getElementById('detail-step-id').textContent = details.id;
+            document.getElementById('detail-step-name').textContent = details.name;
+            document.getElementById('detail-step-status').innerHTML = 
+                `<span class="status-indicator ${getStatusClass(details.status)}">${details.status}</span>`;
+            document.getElementById('detail-step-created').textContent = formatDate(details.created);
+            document.getElementById('detail-step-started').textContent = formatDate(details.started);
+            document.getElementById('detail-step-ended').textContent = formatDate(details.ended);
+            document.getElementById('detail-step-duration').textContent = 
+                details.started ? formatDuration(new Date(details.ended || new Date()) - new Date(details.started)) : 'N/A';
+            document.getElementById('detail-jar').textContent = details.jar;
+            document.getElementById('detail-main-class').textContent = details.mainClass;
+            document.getElementById('detail-arguments').textContent = details.args?.join('\n') || 'No arguments';
+            if (details.errorMessage) {
+                document.getElementById('detail-error-message').textContent = details.errorMessage;
+            }
+        };
+
+        function getStatusClass(status) {
+            return {
+                'RUNNING': 'status-running',
+                'COMPLETED': 'status-completed',
+                'FAILED': 'status-failed',
+                'CANCELLED': 'status-warning',
+                'PENDING': 'status-pending'
+            }[status] || '';
+        };
+
+        function formatDate(dateString) {
+            return dateString ? new Date(dateString).toLocaleString() : 'N/A';
+        };
+    </script>
+
+    <style>
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: var(--background-light);
+            border-radius: var(--card-border-radius);
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: var(--space-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .modal-body {
+            padding: var(--space-md);
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .modal-footer {
+            padding: var(--space-md);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-sm);
+        }
+        
+        .modal-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+            gap: var(--space-md);
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: var(--space-md);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: var(--space-sm);
+        }
+        
+        .detail-label {
+            flex: 0 0 40%;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .detail-value {
+            flex: 0 0 60%;
+        }
+        
+        /* Code blocks */
+        .code-block {
+            background-color: var(--background-darker);
+            padding: var(--space-md);
+            border-radius: var(--card-border-radius);
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre;
+            margin: 0;
+        }
+        
+        .error-block {
+            background-color: var(--status-error-bg);
+            color: var(--text-primary);
+            border-left: 4px solid var(--status-error);
+        }
+        
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: var(--space-md);
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: var(--space-sm) var(--space-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+        
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background-color: var(--background-light);
+        }
+        
+        .tab-btn.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+        
+        .tab-pane {
+            display: none;
+        }
+        
+        .tab-pane.active {
+            display: block;
+        }
+        
+        /* Responsive Table */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 0 -16px;  /* Compensate for parent padding */
+            padding: 0 16px;  /* Add padding back */
+        }
+        
+        /* Utility classes */
+        .mt-md {
+            margin-top: var(--space-md);
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 90%;
+                margin: 0 16px;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+            }
+            
+            .detail-label {
+                flex: none;
+                margin-bottom: var(--space-xs);
+            }
+            
+            .detail-value {
+                flex: none;
+            }
+            
+            .tab-navigation {
+                overflow-x: auto;
+                padding-bottom: var(--space-xs);
+            }
+            
+            .tab-btn {
+                flex-shrink: 0;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</body>
+</html>

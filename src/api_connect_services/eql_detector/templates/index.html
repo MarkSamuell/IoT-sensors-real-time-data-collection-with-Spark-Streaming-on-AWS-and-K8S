@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>EQL Detector Dashboard</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    </head>
+    <body>
+        <div class="app-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2a10 10 0 0 0-7.743 16.33l-1.955 1.96A1 1 0 0 0 3 22h3.1A10 10 0 1 0 12 2z"/>
+                        <path d="M16.5 11.5h-7"/>
+                        <path d="M12 7.5v8"/>
+                    </svg>
+                    EQL Detector
+                </div>
+                <ul class="sidebar-menu">
+                    <li class="sidebar-menu-item active" id="dashboard-nav">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        Dashboard
+                    </li>
+                    <li class="sidebar-menu-item" id="add-query-nav">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14"></path>
+                            <path d="M5 12h14"></path>
+                        </svg>
+                        Add Query
+                    </li>
+                    <li class="sidebar-menu-item" id="upload-config-nav">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        Upload Config
+                    </li>
+                </ul>
+                <div class="sidebar-footer">
+                    EQL Detector v1.0.0
+                </div>
+            </aside>
+    
+            <!-- Main Content -->
+            <main class="main-content">
+                <div id="dashboard-content" class="content-wrapper">
+                    <!-- Header -->
+                    <div class="main-header d-flex justify-between align-center">
+                        <div>
+                            <h1 class="page-title">EQL Security Detector Dashboard</h1>
+                        </div>
+                        <div>
+                            <button id="refresh-btn" class="btn btn-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 4v6h-6"></path>
+                                    <path d="M1 20v-6h6"></path>
+                                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
+                                    <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                </svg>
+                                Refresh
+                            </button>
+                            <button id="stop-all-btn" class="btn btn-danger">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                </svg>
+                                Stop All
+                            </button>
+                            <button id="add-query-btn" class="btn btn-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                Add Query
+                            </button>
+                        </div>
+                    </div>
+    
+                    <!-- Alert Messages -->
+                    <div id="alert-container"></div>
+    
+                    <!-- Stats Overview -->
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-title">Total Queries</div>
+                            <div class="stat-value" id="total-queries">0</div>
+                            <div class="stat-description">configured queries</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Running Queries</div>
+                            <div class="stat-value" id="running-queries">0</div>
+                            <div class="stat-description">currently active</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Detected Events</div>
+                            <div class="stat-value" id="detected-events">0</div>
+                            <div class="stat-description">security events found</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-title">Error States</div>
+                            <div class="stat-value" id="error-queries">0</div>
+                            <div class="stat-description">queries with errors</div>
+                        </div>
+                    </div>
+    
+                    <!-- Queries Table -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Active Queries</h2>
+                            <span class="badge badge-info" id="active-queries-count">0</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="queries-table-container" class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Query ID</th>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Status</th>
+                                            <th>Event Count</th>
+                                            <th>Last Run</th>
+                                            <th>Interval (s)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="queries-table-body">
+                                        <!-- Queries will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="no-queries-message" class="data-table-empty">
+                                <div class="text-center mb-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                    </svg>
+                                </div>
+                                <p class="text-center text-muted">No queries configured. Add a query or upload a configuration file.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div id="add-query-content" class="content-wrapper" style="display: none;">
+                    <!-- Header -->
+                    <div class="main-header">
+                        <div>
+                            <div class="breadcrumb">
+                                <a href="#" id="back-to-dashboard">Dashboard</a>
+                                <span class="breadcrumb-separator">/</span>
+                                <span>Add Query</span>
+                            </div>
+                            <h1 class="page-title">Add New Query</h1>
+                        </div>
+                    </div>
+    
+                    <!-- Add Query Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Query Configuration</h2>
+                        </div>
+                        <div class="card-body">
+                            <form id="add-query-form">
+                                <div class="form-group">
+                                    <label for="query-id" class="form-label">Query ID</label>
+                                    <input type="text" id="query-id" name="id" class="form-control" placeholder="unique_query_identifier" required>
+                                    <small class="text-muted">A unique identifier for this query</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="query-type" class="form-label">Query Type</label>
+                                    <input type="text" id="query-type" name="type" class="form-control" placeholder="eql_based" required>
+                                    <small class="text-muted">The type/category of detection</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="source-index" class="form-label">Source Index</label>
+                                    <input type="text" id="source-index" name="source_index" class="form-control" placeholder="logs-*" required>
+                                    <small class="text-muted">The Elasticsearch index pattern to query</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="eql-query" class="form-label">EQL Query</label>
+                                    <textarea id="eql-query" name="eql_query" class="form-control" rows="4" placeholder="sequence [authentication where event.action==\"failed\"] with maxspan=5m" required></textarea>
+                                    <small class="text-muted">The Event Query Language (EQL) query to execute</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="interval" class="form-label">Interval (seconds)</label>
+                                    <input type="number" id="interval" name="interval" class="form-control" value="60" min="5" required>
+                                    <small class="text-muted">How often to run this query (in seconds)</small>
+                                </div>
+                                
+                                <h3 class="mb-sm mt-md">Security Event Configuration</h3>
+                                
+                                <div class="form-group">
+                                    <label for="sev-id-prefix" class="form-label">ID Prefix</label>
+                                    <input type="text" id="sev-id-prefix" name="id_prefix" class="form-control" placeholder="BF" required>
+                                    <small class="text-muted">Prefix for generated security event IDs</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="sev-name" class="form-label">Event Name</label>
+                                    <input type="text" id="sev-name" name="name" class="form-control" placeholder="Brute Force Detection" required>
+                                    <small class="text-muted">Name of the security event</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="sev-description" class="form-label">Description</label>
+                                    <textarea id="sev-description" name="description" class="form-control" rows="2" placeholder="Multiple failed login attempts detected from {source_ip}" required></textarea>
+                                    <small class="text-muted">Description template (supports field placeholders)</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="sev-severity" class="form-label">Severity</label>
+                                    <select id="sev-severity" name="severity" class="form-select" required>
+                                        <option value="low">Low</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="high" selected>High</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                    <small class="text-muted">Severity level of detected events</small>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Dynamic Fields</label>
+                                    <div id="dynamic-fields-container">
+                                        <div class="d-flex gap-md mb-sm dynamic-field-row">
+                                            <input type="text" class="form-control" name="field_name" placeholder="Field name (e.g. source_ip)">
+                                            <input type="text" class="form-control" name="field_path" placeholder="Field path (e.g. source.ip)">
+                                            <button type="button" class="btn btn-danger remove-field">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button type="button" id="add-field-btn" class="btn btn-secondary btn-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        </svg>
+                                        Add Field
+                                    </button>
+                                    <small class="text-muted d-block mt-md">Dynamic fields to extract from events (for use in description)</small>
+                                </div>
+                                
+                                <div class="form-group d-flex justify-between">
+                                    <button type="button" id="cancel-add-query" class="btn btn-secondary">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Add Query</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+    
+                <div id="upload-config-content" class="content-wrapper" style="display: none;">
+                    <!-- Header -->
+                    <div class="main-header">
+                        <div>
+                            <div class="breadcrumb">
+                                <a href="#" id="back-to-dashboard-from-upload">Dashboard</a>
+                                <span class="breadcrumb-separator">/</span>
+                                <span>Upload Configuration</span>
+                            </div>
+                            <h1 class="page-title">Upload Configuration File</h1>
+                        </div>
+                    </div>
+    
+                    <!-- Upload Config Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Configuration File</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                                <div>
+                                    <strong>Note:</strong> Uploading a new configuration will replace all existing queries. The file should be in YAML format.
+                                </div>
+                            </div>
+                            
+                            <form id="upload-config-form" enctype="multipart/form-data">
+                                <div class="form-group">
+                                    <label for="config-file" class="form-label">Configuration File</label>
+                                    <input type="file" id="config-file" name="file" class="form-control" accept=".yaml,.yml" required>
+                                    <small class="text-muted">Select a YAML configuration file</small>
+                                </div>
+                                
+                                <div class="form-group d-flex justify-between">
+                                    <button type="button" id="cancel-upload" class="btn btn-secondary">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Upload & Apply</button>
+                                </div>
+                            </form>
+                            
+                            <div class="mt-md">
+                                <h3 class="mb-sm">Configuration</h3>
+                                <div class="form-group">
+                                    <label for="config-yaml" class="form-label">YAML Configuration</label>
+                                    <textarea id="config-yaml" name="config-yaml" class="form-control code-textarea" rows="15" placeholder="Paste your YAML configuration here..."></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <button type="button" id="apply-config-btn" class="btn btn-primary">Apply Configuration</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    
+        <!-- Query Details Modal -->
+        <div id="query-details-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Query Details</h2>
+                    <button class="btn-icon close-modal">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="query-details-content">
+                        <!-- Query details will be populated here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary close-modal">Close</button>
+                </div>
+            </div>
+        </div>
+    
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Navigation
+                const dashboardNav = document.getElementById('dashboard-nav');
+                const addQueryNav = document.getElementById('add-query-nav');
+                const uploadConfigNav = document.getElementById('upload-config-nav');
+                const dashboardContent = document.getElementById('dashboard-content');
+                const addQueryContent = document.getElementById('add-query-content');
+                const uploadConfigContent = document.getElementById('upload-config-content');
+                const backToDashboard = document.getElementById('back-to-dashboard');
+                const backToDashboardFromUpload = document.getElementById('back-to-dashboard-from-upload');
+                const addQueryBtn = document.getElementById('add-query-btn');
+                const cancelAddQuery = document.getElementById('cancel-add-query');
+                const cancelUpload = document.getElementById('cancel-upload');
+                
+                // Show dashboard content
+                function showDashboard() {
+                    dashboardContent.style.display = 'block';
+                    addQueryContent.style.display = 'none';
+                    uploadConfigContent.style.display = 'none';
+                    
+                    dashboardNav.classList.add('active');
+                    addQueryNav.classList.remove('active');
+                    uploadConfigNav.classList.remove('active');
+                    
+                    // Refresh data
+                    fetchQueries();
+                }
+                
+                // Show add query content
+                function showAddQuery() {
+                    dashboardContent.style.display = 'none';
+                    addQueryContent.style.display = 'block';
+                    uploadConfigContent.style.display = 'none';
+                    
+                    dashboardNav.classList.remove('active');
+                    addQueryNav.classList.add('active');
+                    uploadConfigNav.classList.remove('active');
+                }
+                
+                // Show upload config content
+                function showUploadConfig() {
+                    dashboardContent.style.display = 'none';
+                    addQueryContent.style.display = 'none';
+                    uploadConfigContent.style.display = 'block';
+                    
+                    dashboardNav.classList.remove('active');
+                    addQueryNav.classList.remove('active');
+                    uploadConfigNav.classList.add('active');
+                }
+                
+                // Navigation event listeners
+                dashboardNav.addEventListener('click', showDashboard);
+                addQueryNav.addEventListener('click', showAddQuery);
+                uploadConfigNav.addEventListener('click', showUploadConfig);
+                backToDashboard.addEventListener('click', showDashboard);
+                backToDashboardFromUpload.addEventListener('click', showDashboard);
+                addQueryBtn.addEventListener('click', showAddQuery);
+                cancelAddQuery.addEventListener('click', showDashboard);
+                cancelUpload.addEventListener('click', showDashboard);
+                
+                // Dynamic fields
+                const dynamicFieldsContainer = document.getElementById('dynamic-fields-container');
+                const addFieldBtn = document.getElementById('add-field-btn');
+                
+                // Add dynamic field
+                addFieldBtn.addEventListener('click', function() {
+                    const fieldRow = document.createElement('div');
+                    fieldRow.className = 'd-flex gap-md mb-sm dynamic-field-row';
+                    fieldRow.innerHTML = `
+                        <input type="text" class="form-control" name="field_name" placeholder="Field name (e.g. source_ip)">
+                        <input type="text" class="form-control" name="field_path" placeholder="Field path (e.g. source.ip)">
+                        <button type="button" class="btn btn-danger remove-field">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    `;
+                    dynamicFieldsContainer.appendChild(fieldRow);
+                    
+                    // Add remove event listener
+                    fieldRow.querySelector('.remove-field').addEventListener('click', function() {
+                        dynamicFieldsContainer.removeChild(fieldRow);
+                    });
+                });
+                
+                // Remove dynamic field
+                document.querySelectorAll('.remove-field').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const fieldRow = this.closest('.dynamic-field-row');
+                        dynamicFieldsContainer.removeChild(fieldRow);
+                    });
+                });
+                
+                // Refresh button
+                const refreshBtn = document.getElementById('refresh-btn');
+                refreshBtn.addEventListener('click', fetchQueries);
+                
+                // Stop all queries button
+                const stopAllBtn = document.getElementById('stop-all-btn');
+                stopAllBtn.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to stop all running queries?')) {
+                        stopAllQueries();
+                    }
+                });
+                
+                // Apply configuration button
+                const applyConfigBtn = document.getElementById('apply-config-btn');
+                if (applyConfigBtn) {
+                    applyConfigBtn.addEventListener('click', async function() {
+                        const configYaml = document.getElementById('config-yaml').value;
+                        
+                        if (!configYaml.trim()) {
+                            showAlert('Please provide a configuration', 'warning');
+                            return;
+                        }
+                        
+                        try {
+                            const response = await fetch('/api/config', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ config: configYaml })
+                            });
+                            
+                            const data = await response.json();
+                            
+                            if (data.success) {
+                                showAlert('Configuration applied successfully', 'success');
+                                showDashboard();
+                            } else {
+                                showAlert('Error applying configuration: ' + data.message, 'danger');
+                            }
+                        } catch (error) {
+                            console.error('Error applying configuration:', error);
+                            showAlert('Error applying configuration: ' + error.message, 'danger');
+                        }
+                    });
+                }
+
+                
+                // Handle placeholder behavior for config textarea - ADD THIS RIGHT HERE
+                const configTextarea = document.getElementById('config-yaml');
+                if (configTextarea) {
+                    configTextarea.addEventListener('focus', function() {
+                        if (this.value === '') {
+                            this.value = '';
+                        }
+                    });
+                    
+                    configTextarea.addEventListener('blur', function() {
+                        if (this.value.trim() === '') {
+                            this.value = '';
+                        }
+                    });
+                }
+
+                
+                // API functions
+                async function fetchQueries() {
+                    try {
+                        const response = await fetch('/api/queries');
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            updateQueriesTable(data.queries);
+                            updateStats(data.queries);
+                        } else {
+                            showAlert('Error fetching queries: ' + data.message, 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching queries:', error);
+                        showAlert('Error fetching queries: ' + error.message, 'danger');
+                    }
+                }
+                
+                async function stopQuery(queryId) {
+                    try {
+                        const response = await fetch(`/api/queries/${queryId}/stop`, {
+                            method: 'POST'
+                        });
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            showAlert(`Query "${queryId}" stopped successfully`, 'success');
+                            fetchQueries();
+                        } else {
+                            showAlert('Error stopping query: ' + data.message, 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error stopping query:', error);
+                        showAlert('Error stopping query: ' + error.message, 'danger');
+                    }
+                }
+                
+                async function restartQuery(queryId) {
+                    try {
+                        const response = await fetch(`/api/queries/${queryId}/restart`, {
+                            method: 'POST'
+                        });
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            showAlert(`Query "${queryId}" restarted successfully`, 'success');
+                            fetchQueries();
+                        } else {
+                            showAlert('Error restarting query: ' + data.message, 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error restarting query:', error);
+                        showAlert('Error restarting query: ' + error.message, 'danger');
+                    }
+                }
+                
+                async function deleteQuery(queryId) {
+                    try {
+                        const response = await fetch(`/api/queries/${queryId}`, {
+                            method: 'DELETE'
+                        });
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            showAlert(`Query "${queryId}" deleted successfully`, 'success');
+                            fetchQueries();
+                        } else {
+                            showAlert('Error deleting query: ' + data.message, 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting query:', error);
+                        showAlert('Error deleting query: ' + error.message, 'danger');
+                    }
+                }
+                
+                async function stopAllQueries() {
+                    try {
+                        const response = await fetch('/api/queries/stop-all', {
+                            method: 'POST'
+                        });
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            showAlert('All queries stopped successfully', 'success');
+                            fetchQueries();
+                        } else {
+                            showAlert('Error stopping all queries: ' + data.message, 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error stopping all queries:', error);
+                        showAlert('Error stopping all queries: ' + error.message, 'danger');
+                    }
+                }
+                
+                async function getQueryDetails(queryId) {
+                    try {
+                        const response = await fetch(`/api/queries/${queryId}`);
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            showQueryDetailsModal(data.query);
+                        } else {
+                            showAlert('Error fetching query details: ' + data.message, 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching query details:', error);
+                        showAlert('Error fetching query details: ' + error.message, 'danger');
+                    }
+                }
+                
+                // Update UI functions
+                function updateQueriesTable(queries) {
+                    const tableBody = document.getElementById('queries-table-body');
+                    const noQueriesMessage = document.getElementById('no-queries-message');
+                    const activeQueriesCount = document.getElementById('active-queries-count');
+                    
+                    // Update active queries count
+                    activeQueriesCount.textContent = queries.length;
+                    
+                    // Clear table body
+                    tableBody.innerHTML = '';
+                    
+                    // Show/hide no queries message
+                    if (queries.length === 0) {
+                        noQueriesMessage.style.display = 'block';
+                        return;
+                    }
+                    
+                    noQueriesMessage.style.display = 'none';
+                    
+                    // Add queries to table
+                    queries.forEach(query => {
+                        const row = document.createElement('tr');
+                        
+                        // Format last run time
+                        let lastRunFormatted = 'N/A';
+                        if (query.last_run_time) {
+                            const lastRun = new Date(query.last_run_time);
+                            const options = { 
+                                year: 'numeric', 
+                                month: 'short', 
+                                day: 'numeric',
+                                hour: '2-digit', 
+                                minute: '2-digit', 
+                                second: '2-digit'
+                            };
+                            lastRunFormatted = new Date(query.last_run_time).toLocaleDateString('en-US', options);
+                        }
+                        
+                        // Create status indicator class
+                        let statusClass = '';
+                        switch (query.status) {
+                            case 'running':
+                                statusClass = 'status-running';
+                                break;
+                            case 'stopped':
+                                statusClass = 'status-warning';
+                                break;
+                            case 'error':
+                                statusClass = 'status-failed';
+                                break;
+                            default:
+                                statusClass = 'status-pending';
+                        }
+                        
+                        row.innerHTML = `
+                            <td><a href="#" class="query-details-link" data-query-id="${query.query_id}">${query.query_id}</a></td>
+                            <td>${query.name}</td>
+                            <td>${query.type}</td>
+                            <td><span class="status-indicator ${statusClass}">${query.status}</span></td>
+                            <td>${query.event_count}</td>
+                            <td>${lastRunFormatted}</td>
+                            <td>${query.interval}</td>
+                            <td>
+                                <div class="d-flex gap-sm">
+                                    ${query.status === 'running' ? 
+                                        `<button class="btn btn-danger btn-sm stop-query-btn" data-query-id="${query.query_id}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                            </svg>
+                                            Stop
+                                        </button>` : 
+                                        `<button class="btn btn-primary btn-sm restart-query-btn" data-query-id="${query.query_id}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M23 4v6h-6"></path>
+                                                <path d="M1 20v-6h6"></path>
+                                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
+                                                <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                            </svg>
+                                            Start
+                                        </button>`
+                                    }
+                                    <button class="btn btn-secondary btn-sm delete-query-btn" data-query-id="${query.query_id}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                                        </svg>
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        
+                        tableBody.appendChild(row);
+                    });
+                    
+                    // Add event listeners for action buttons
+                    document.querySelectorAll('.stop-query-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const queryId = this.getAttribute('data-query-id');
+                            if (confirm(`Are you sure you want to stop query "${queryId}"?`)) {
+                                stopQuery(queryId);
+                            }
+                        });
+                    });
+                    
+                    document.querySelectorAll('.restart-query-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const queryId = this.getAttribute('data-query-id');
+                            if (confirm(`Are you sure you want to restart query "${queryId}"?`)) {
+                                restartQuery(queryId);
+                            }
+                        });
+                    });
+                    
+                    document.querySelectorAll('.delete-query-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const queryId = this.getAttribute('data-query-id');
+                            if (confirm(`Are you sure you want to delete query "${queryId}"? This cannot be undone.`)) {
+                                deleteQuery(queryId);
+                            }
+                        });
+                    });
+                    
+                    document.querySelectorAll('.query-details-link').forEach(link => {
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const queryId = this.getAttribute('data-query-id');
+                            getQueryDetails(queryId);
+                        });
+                    });
+                }
+                
+                function updateStats(queries) {
+                    const totalQueries = document.getElementById('total-queries');
+                    const runningQueries = document.getElementById('running-queries');
+                    const errorQueries = document.getElementById('error-queries');
+                    const detectedEvents = document.getElementById('detected-events');
+                    
+                    // Update total queries count
+                    totalQueries.textContent = queries.length;
+                    
+                    // Update running queries count
+                    const runningCount = queries.filter(q => q.status === 'running').length;
+                    runningQueries.textContent = runningCount;
+                    
+                    // Update error queries count
+                    const errorCount = queries.filter(q => q.status === 'error').length;
+                    errorQueries.textContent = errorCount;
+                    
+                    // Update detected events count
+                    const eventCount = queries.reduce((total, q) => total + q.event_count, 0);
+                    detectedEvents.textContent = eventCount;
+                }
+                
+                function showAlert(message, type) {
+                    const alertContainer = document.getElementById('alert-container');
+                    const alert = document.createElement('div');
+                    alert.className = `alert alert-${type}`;
+                    
+                    let icon = '';
+                    switch (type) {
+                        case 'success':
+                            icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>`;
+                            break;
+                        case 'danger':
+                            icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>`;
+                            break;
+                        case 'warning':
+                            icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>`;
+                            break;
+                        default:
+                            icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="16" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                            </svg>`;
+                    }
+                    
+                    alert.innerHTML = `
+                        ${icon}
+                        <div>${message}</div>
+                    `;
+                    
+                    alertContainer.appendChild(alert);
+                    
+                    // Remove alert after 5 seconds
+                    setTimeout(() => {
+                        alert.classList.add('fade-out');
+                        setTimeout(() => {
+                            alertContainer.removeChild(alert);
+                        }, 300);
+                    }, 5000);
+                }
+                
+                function showQueryDetailsModal(query) {
+                    const modal = document.getElementById('query-details-modal');
+                    const queryDetailsContent = document.getElementById('query-details-content');
+                    
+                    // Format last run time
+                    let lastRunFormatted = 'N/A';
+                    if (query.last_run_time) {
+                        const options = { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric',
+                            hour: '2-digit', 
+                            minute: '2-digit', 
+                            second: '2-digit'
+                        };
+                        lastRunFormatted = new Date(query.last_run_time).toLocaleDateString('en-US', options);
+                    }
+                    
+                    // Format status with indicator
+                    let statusClass = '';
+                    switch (query.status) {
+                        case 'running':
+                            statusClass = 'status-running';
+                            break;
+                        case 'stopped':
+                            statusClass = 'status-warning';
+                            break;
+                        case 'error':
+                            statusClass = 'status-failed';
+                            break;
+                        default:
+                            statusClass = 'status-pending';
+                    }
+                    
+                    // Populate details
+                    queryDetailsContent.innerHTML = `
+                        <div class="detail-row">
+                            <div class="detail-label">Query ID:</div>
+                            <div class="detail-value">${query.query_id}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Name:</div>
+                            <div class="detail-value">${query.name}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Type:</div>
+                            <div class="detail-value">${query.type}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Status:</div>
+                            <div class="detail-value"><span class="status-indicator ${statusClass}">${query.status}</span></div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Event Count:</div>
+                            <div class="detail-value">${query.event_count}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Last Run:</div>
+                            <div class="detail-value">${lastRunFormatted}</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Interval:</div>
+                            <div class="detail-value">${query.interval} seconds</div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Source Index:</div>
+                            <div class="detail-value">${query.source_index}</div>
+                        </div>
+                        ${query.last_error ? `
+                        <div class="detail-row">
+                            <div class="detail-label">Last Error:</div>
+                            <div class="detail-value text-danger">${query.last_error}</div>
+                        </div>
+                        ` : ''}
+                    `;
+                    
+                    // Show modal
+                    modal.style.display = 'flex';
+                    
+                    // Close modal when clicking on close buttons
+                    document.querySelectorAll('.close-modal').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            modal.style.display = 'none';
+                        });
+                    });
+                    
+                    // Close modal when clicking outside
+                    window.addEventListener('click', e => {
+                        if (e.target === modal) {
+                            modal.style.display = 'none';
+                        }
+                    });
+                }
+                
+                // Form submissions
+                const addQueryForm = document.getElementById('add-query-form');
+                addQueryForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    // Collect form data
+                    const formData = {
+                        id: document.getElementById('query-id').value,
+                        type: document.getElementById('query-type').value,
+                        source_index: document.getElementById('source-index').value,
+                        eql_query: document.getElementById('eql-query').value,
+                        interval: parseInt(document.getElementById('interval').value),
+                        sev_config: {
+                            id_prefix: document.getElementById('sev-id-prefix').value,
+                            name: document.getElementById('sev-name').value,
+                            description: document.getElementById('sev-description').value,
+                            severity: document.getElementById('sev-severity').value,
+                            dynamic_fields: {}
+                        }
+                    };
+                    
+                    // Collect dynamic fields
+                    const fieldRows = dynamicFieldsContainer.querySelectorAll('.dynamic-field-row');
+                    fieldRows.forEach(row => {
+                        const fieldName = row.querySelector('input[name="field_name"]').value;
+                        const fieldPath = row.querySelector('input[name="field_path"]').value;
+                        
+                        if (fieldName && fieldPath) {
+                            formData.sev_config.dynamic_fields[fieldName] = fieldPath;
+                        }
+                    });
+                    
+                    try {
+                        const response = await fetch('/api/queries', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(formData)
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            showAlert(`Query "${formData.id}" added successfully`, 'success');
+                            addQueryForm.reset();
+                            showDashboard();
+                        } else {
+                            showAlert('Error adding query: ' + data.message, 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error adding query:', error);
+                        showAlert('Error adding query: ' + error.message, 'danger');
+                    }
+                });
+                
+                const uploadConfigForm = document.getElementById('upload-config-form');
+                uploadConfigForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const formData = new FormData();
+                    const fileInput = document.getElementById('config-file');
+                    
+                    if (fileInput.files.length === 0) {
+                        showAlert('Please select a configuration file', 'warning');
+                        return;
+                    }
+                    
+                    formData.append('file', fileInput.files[0]);
+                    
+                    try {
+                        const response = await fetch('/api/config', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            showAlert('Configuration uploaded and applied successfully', 'success');
+                            uploadConfigForm.reset();
+                            showDashboard();
+                        } else {
+                            showAlert('Error uploading configuration: ' + data.message, 'danger');
+                        }
+                    } catch (error) {
+                        console.error('Error uploading configuration:', error);
+                        showAlert('Error uploading configuration: ' + error.message, 'danger');
+                    }
+                });
+                
+                // Initial fetch
+                fetchQueries();
+            });
+        </script>
+    
+        <style>
+            /* Additional styles not in the main stylesheet */
+            .code-textarea {
+                font-family: monospace;
+                font-size: 0.9rem;
+                background-color: var(--background-darker);
+                color: var(--text-primary);
+                line-height: 1.4;
+                tab-size: 2;
+            }
+            
+            .code-block {
+                background-color: var(--background-darker);
+                border-radius: var(--card-border-radius);
+                padding: var(--space-md);
+                overflow-x: auto;
+                font-family: monospace;
+                font-size: 0.9rem;
+                color: var(--text-primary);
+                white-space: pre;
+                line-height: 1.4;
+            }
+            
+            .mt-md {
+                margin-top: var(--space-md);
+            }
+            
+            .fade-out {
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            /* Modal styles */
+            .modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            }
+    
+            .modal-content {
+                background-color: var(--background-light);
+                border-radius: var(--card-border-radius);
+                width: 100%;
+                max-width: 600px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+    
+            .modal-header {
+                padding: var(--space-md);
+                border-bottom: 1px solid var(--border-color);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+    
+            .modal-title {
+                font-size: 1.25rem;
+                font-weight: 600;
+            }
+    
+            .modal-body {
+                padding: var(--space-md);
+                max-height: 70vh;
+                overflow-y: auto;
+            }
+    
+            .modal-footer {
+                padding: var(--space-md);
+                border-top: 1px solid var(--border-color);
+                display: flex;
+                justify-content: flex-end;
+                gap: var(--space-sm);
+            }
+    
+            .detail-row {
+                display: flex;
+                border-bottom: 1px solid var(--border-color);
+                padding-bottom: var(--space-sm);
+                margin-bottom: var(--space-sm);
+            }
+    
+            .detail-label {
+                flex: 0 0 40%;
+                font-weight: 500;
+                color: var(--text-secondary);
+            }
+    
+            .detail-value {
+                flex: 0 0 60%;
+            }
+            
+            /* Alert container styles */
+            #alert-container {
+                position: fixed;
+                top: var(--space-md);
+                right: var(--space-md);
+                z-index: 1000;
+                width: 300px;
+            }
+            
+            #alert-container .alert {
+                margin-bottom: var(--space-sm);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                animation: slide-in 0.3s ease;
+            }
+            
+            @keyframes slide-in {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            /* Forms */
+            .form-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: var(--space-md);
+            }
+            
+            @media (max-width: 768px) {
+                .form-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+    </body>
+</html>

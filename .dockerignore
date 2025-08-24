@@ -1,0 +1,57 @@
+# .dockerignore
+
+# Version control
+.git/
+.github/
+.gitignore
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+**/*.egg-info
+.coverage
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.whl
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and temporary files
+logs/
+*.log
+tmp/
+temp/
+
+# Documentation
+docs/
+*.md
+LICENSE
+
+# Project specific directories
+k8s-EKS/
+testing/
+archive/
+submit/
+
+# Large files that don't need to be in the image
+*.csv
+*.parquet
+*.json
+!configs/*.json
+*.h5
+*.pkl

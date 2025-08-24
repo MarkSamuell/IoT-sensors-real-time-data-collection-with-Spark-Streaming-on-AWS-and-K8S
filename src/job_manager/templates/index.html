@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12H4.5a2.5 2.5 0 0 1 0-5H9"></path>
+                    <path d="M15 12h4.5a2.5 2.5 0 0 0 0-5H15"></path>
+                    <line x1="9" y1="12" x2="15" y2="12"></line>
+                    <line x1="9" y1="17" x2="15" y2="17"></line>
+                    <line x1="12" y1="12" x2="12" y2="17"></line>
+                </svg>
+                Job Manager
+            </div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item active" id="dashboard-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    Dashboard
+                </li>
+                <li class="sidebar-menu-item" id="submit-job-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+                        <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+                    </svg>
+                    Submit Job
+                </li>
+                <li class="sidebar-menu-item" id="query-tool-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                        <line x1="9" y1="20" x2="15" y2="20"></line>
+                        <line x1="12" y1="4" x2="12" y2="20"></line>
+                    </svg>
+                    Query Tool
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                Job Manager v0.0.1
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Header -->
+                <div class="main-header">
+                    <h1 class="page-title">Clusters Dashboard</h1>
+                </div>
+
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {% if category == 'success' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                                {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                {% endif %}
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Stats Overview -->
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-title">Active Clusters</div>
+                        <div class="stat-value">{{ clusters|length }}</div>
+                        <div class="stat-description">clusters available</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Running Jobs</div>
+                        <div class="stat-value" id="running-jobs-count">-</div>
+                        <div class="stat-description">Currently processing</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Completed Jobs</div>
+                        <div class="stat-value" id="completed-jobs-count">-</div>
+                        <div class="stat-description">Last 24 hours</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Failed Jobs</div>
+                        <div class="stat-value" id="failed-jobs-count">-</div>
+                        <div class="stat-description">Last 24 hours</div>
+                    </div>
+                </div>
+
+                <!-- Active Clusters -->
+                <div class="card mb-lg">
+                    <div class="card-header">
+                        <h2 class="card-title">Active Clusters</h2>
+                        <span class="text-muted">{{ clusters|length }} clusters available</span>
+                    </div>
+                    <div class="card-body">
+                        {% if clusters %}
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Select</th>
+                                        <th>Cluster ID</th>
+                                        <th>Name</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for cluster in clusters %}
+                                    <tr>
+                                        <td>
+                                            <input type="radio" name="cluster_selection" 
+                                                   class="cluster-radio" 
+                                                   data-cluster-id="{{ cluster.Id }}"
+                                                   data-cluster-name="{{ cluster.Name }}">
+                                        </td>
+                                        <td>{{ cluster.Id }}</td>
+                                        <td>{{ cluster.Name }}</td>
+                                        <td>
+                                            {% if cluster.Status.State == 'RUNNING' %}
+                                            <span class="status-indicator status-running">Running</span>
+                                            {% elif cluster.Status.State == 'WAITING' %}
+                                            <span class="status-indicator status-pending">Waiting</span>
+                                            {% else %}
+                                            <span class="status-indicator status-warning">{{ cluster.Status.State }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ cluster.Status.Timeline.CreationDateTime.strftime('%Y-%m-%d %H:%M') if cluster.Status.Timeline.CreationDateTime else 'N/A' }}</td>
+                                        <td>
+                                            <div class="d-flex gap-sm">
+                                                <button class="btn btn-primary btn-sm submit-job-btn" 
+                                                        data-cluster-id="{{ cluster.Id }}" 
+                                                        data-cluster-name="{{ cluster.Name }}">
+                                                    Submit New Job
+                                                </button>
+                                                <button class="btn btn-secondary btn-sm cluster-details-btn" data-cluster-id="{{ cluster.Id }}">
+                                                    Details
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="data-table-empty">
+                            <div class="text-center mb-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-muted">
+                                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                                </svg>
+                            </div>
+                            <p class="text-center text-muted">No active clusters found.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recent Jobs -->
+                <div class="card">
+                    <div class="card-header d-flex justify-between align-center">
+                        <div>
+                            <h2 class="card-title">Recent Jobs</h2>
+                            <span class="text-muted">Last 10 jobs submitted</span>
+                        </div>
+                        <div>
+                            <button id="view-all-jobs-btn" class="btn btn-primary btn-sm" disabled>
+                                View All Jobs
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="recent-jobs">
+                            <div class="d-flex justify-between align-center text-center">
+                                <div class="loader"></div>
+                                <p class="text-muted">Loading recent jobs...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Cluster Details Modal -->
+    <div id="cluster-details-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Cluster Details</h2>
+                <button class="btn-icon close-modal">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-loading">
+                    <div class="loader"></div>
+                    <p>Loading cluster details...</p>
+                </div>
+                <div class="cluster-details-content" style="display: none;">
+                    <div class="detail-row">
+                        <div class="detail-label">Cluster ID</div>
+                        <div class="detail-value" id="detail-cluster-id"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Name</div>
+                        <div class="detail-value" id="detail-cluster-name"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value" id="detail-cluster-status"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Created</div>
+                        <div class="detail-value" id="detail-cluster-created"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Master Public DNS</div>
+                        <div class="detail-value" id="detail-master-dns"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Instance Count</div>
+                        <div class="detail-value" id="detail-instance-count"></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Applications</div>
+                        <div class="detail-value" id="detail-applications"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal">Close</button>
+                <button class="btn btn-primary" id="view-jobs-btn">View Jobs</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize job counts
+        fetchJobCounts();
+        
+        // Setup modal functionality
+        setupModal();
+        
+        document.getElementById('recent-jobs').innerHTML = `
+            <div class="data-table-empty">
+                <p class="text-center text-muted">Please select a cluster to view recent jobs.</p>
+            </div>
+        `;
+
+        // Cluster selection and View All Jobs functionality
+        const clusterRadios = document.querySelectorAll('.cluster-radio');
+        const viewAllJobsBtn = document.getElementById('view-all-jobs-btn');
+        let selectedClusterId = null;
+        let selectedClusterName = null;
+
+        clusterRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Uncheck other radios
+                clusterRadios.forEach(r => {
+                    if (r !== this) r.checked = false;
+                });
+
+                if (this.checked) {
+                    selectedClusterId = this.getAttribute('data-cluster-id');
+                    selectedClusterName = this.getAttribute('data-cluster-name');
+                    viewAllJobsBtn.disabled = false;
+                } else {
+                    selectedClusterId = null;
+                    selectedClusterName = null;
+                    viewAllJobsBtn.disabled = true;
+                }
+            });
+        });
+
+        // Add this block here
+        document.querySelectorAll('.cluster-radio').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.checked) {
+                    selectedClusterId = this.getAttribute('data-cluster-id');
+                    selectedClusterName = this.getAttribute('data-cluster-name');
+                    viewAllJobsBtn.disabled = false;
+                    // Pass the selected cluster ID to fetchRecentJobs
+                    fetchRecentJobs(selectedClusterId);
+                }
+            });
+        });
+
+        // View All Jobs button functionality
+        viewAllJobsBtn.addEventListener('click', function() {
+            if (selectedClusterId) {
+                console.log("Navigating to all jobs view for cluster:", selectedClusterId);
+                window.location.href = `/all_jobs/${selectedClusterId}`;
+            } else {
+                alert('Please select a cluster first');
+            }
+        });
+
+        // Sidebar navigation
+        document.getElementById('submit-job-nav').addEventListener('click', function() {
+        window.location.href = "{{ url_for('submit_job') }}";
+            });
+            
+            // Add this new handler for Query Tool
+            document.getElementById('query-tool-nav').addEventListener('click', function() {
+                window.location.href = "{{ url_for('query_tool') }}";
+            });
+        });
+        
+        document.querySelectorAll('.submit-job-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const clusterId = this.getAttribute('data-cluster-id');
+                window.location.href = `/submit_job?cluster_id=${clusterId}`;
+            });
+        });
+
+        function fetchJobCounts() {
+            fetch('/api/job_counts')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        console.error('Error fetching job counts:', data.error);
+                        // Fallback to showing placeholders
+                        document.getElementById('running-jobs-count').textContent = '-';
+                        document.getElementById('completed-jobs-count').textContent = '-';
+                        document.getElementById('failed-jobs-count').textContent = '-';
+                    } else {
+                        document.getElementById('running-jobs-count').textContent = data.running;
+                        document.getElementById('completed-jobs-count').textContent = data.completed;
+                        document.getElementById('failed-jobs-count').textContent = data.failed;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching job counts:', error);
+                    document.getElementById('running-jobs-count').textContent = '-';
+                    document.getElementById('completed-jobs-count').textContent = '-';
+                    document.getElementById('failed-jobs-count').textContent = '-';
+                });
+        }
+
+        function setupModal() {
+            const modal = document.getElementById('cluster-details-modal');
+            const closeButtons = document.querySelectorAll('.close-modal');
+            const detailButtons = document.querySelectorAll('.cluster-details-btn');
+            const viewJobsBtn = document.getElementById('view-jobs-btn');
+            
+            detailButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const clusterId = this.getAttribute('data-cluster-id');
+                    openClusterDetailsModal(clusterId);
+                });
+            });
+            
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            viewJobsBtn.addEventListener('click', function() {
+                const clusterId = this.getAttribute('data-cluster-id');
+                window.location.href = `/job_status/${clusterId}`;
+            });
+        }
+
+        function openClusterDetailsModal(clusterId) {
+            const modal = document.getElementById('cluster-details-modal');
+            const loading = modal.querySelector('.modal-loading');
+            const content = modal.querySelector('.cluster-details-content');
+            const viewJobsBtn = document.getElementById('view-jobs-btn');
+            
+            // Show modal with loading state
+            modal.style.display = 'block';
+            loading.style.display = 'flex';
+            content.style.display = 'none';
+            
+            // Set cluster ID for the view jobs button
+            viewJobsBtn.setAttribute('data-cluster-id', clusterId);
+            
+            // For demo, simulate API call to get cluster details
+            setTimeout(() => {
+                // In a real app, this would be an actual API call
+                fetchClusterDetails(clusterId)
+                    .then(clusterDetails => {
+                        displayClusterDetails(clusterDetails);
+                        loading.style.display = 'none';
+                        content.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching cluster details:', error);
+                        loading.innerHTML = `<p class="text-danger">Error loading cluster details. Please try again.</p>`;
+                    });
+            }, 1000);
+        }
+
+        // Simulate fetching cluster details (in a real app, this would be an API call)
+        function fetchClusterDetails(clusterId) {
+            return fetch(`/api/cluster_details/${clusterId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch cluster details');
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    console.error('Error fetching cluster details:', error);
+                    throw error;
+                });
+        }
+
+        function displayClusterDetails(details) {
+            document.getElementById('detail-cluster-id').textContent = details.id;
+            document.getElementById('detail-cluster-name').textContent = details.name;
+            document.getElementById('detail-cluster-status').textContent = details.status;
+            document.getElementById('detail-cluster-created').textContent = details.created;
+            document.getElementById('detail-master-dns').textContent = details.masterDns;
+            document.getElementById('detail-instance-count').textContent = details.instanceCount;
+            
+            const applicationsElement = document.getElementById('detail-applications');
+            applicationsElement.innerHTML = '';
+            details.applications.forEach(app => {
+                const badge = document.createElement('span');
+                badge.className = 'badge badge-info';
+                badge.textContent = app;
+                badge.style.marginRight = '4px';
+                badge.style.marginBottom = '4px';
+                applicationsElement.appendChild(badge);
+            });
+        }
+
+        function fetchRecentJobs(clusterId = null) {
+            const recentJobsElement = document.getElementById('recent-jobs');
+            
+            // If no specific clusterId is provided, try to get the selected one
+            if (!clusterId) {
+                clusterId = document.querySelector('.cluster-radio:checked')?.getAttribute('data-cluster-id');
+            }
+            
+            // Show loading state
+            recentJobsElement.innerHTML = `
+                <div class="d-flex justify-center align-center text-center p-lg">
+                    <div class="loader mr-md"></div>
+                    <p class="text-muted">Loading recent jobs...</p>
+                </div>
+            `;
+            
+            if (!clusterId) {
+                recentJobsElement.innerHTML = `
+                    <div class="data-table-empty">
+                        <p class="text-center text-muted">Please select a cluster to view recent jobs.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Fetch cluster steps with the specific clusterId
+            fetch(`/api/cluster_steps/${clusterId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(steps => {
+                    // Process the returned steps and display them
+                    if (steps && steps.length > 0) {
+                        const jobsTableHTML = `
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Step Name</th>
+                                        <th>Status</th>
+                                        <th>Started</th>
+                                        <th>Ended</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${steps.map(step => `
+                                        <tr>
+                                            <td>${step.Name || 'Unnamed Step'}</td>
+                                            <td>
+                                                <span class="status-indicator 
+                                                    ${step.Status.State === 'RUNNING' ? 'status-running' : 
+                                                    step.Status.State === 'COMPLETED' ? 'status-completed' : 
+                                                    step.Status.State === 'FAILED' ? 'status-failed' : 
+                                                    step.Status.State === 'CANCELLED' ? 'status-warning' : 
+                                                    'status-pending'}">
+                                                    ${step.Status.State}
+                                                </span>
+                                            </td>
+                                            <td>${step.Status.Timeline && step.Status.Timeline.StartDateTime ? 
+                                                new Date(step.Status.Timeline.StartDateTime).toLocaleString() : 
+                                                'N/A'}</td>
+                                            <td>${step.Status.Timeline && step.Status.Timeline.EndDateTime ? 
+                                                new Date(step.Status.Timeline.EndDateTime).toLocaleString() : 
+                                                'N/A'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                        recentJobsElement.innerHTML = jobsTableHTML;
+                    } else {
+                        recentJobsElement.innerHTML = `
+                            <div class="data-table-empty">
+                                <p class="text-center text-muted">No recent jobs found for the selected cluster.</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching recent jobs:', error);
+                    recentJobsElement.innerHTML = `
+                        <div class="data-table-empty">
+                            <p class="text-center text-danger">Error loading jobs: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        }
+    </script>
+
+    <style>
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: var(--background-light);
+            border-radius: var(--card-border-radius);
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            padding: var(--space-md);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .modal-body {
+            padding: var(--space-md);
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .modal-footer {
+            padding: var(--space-md);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-sm);
+        }
+        
+        .modal-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+            gap: var(--space-md);
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: var(--space-md);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: var(--space-sm);
+        }
+        
+        .detail-label {
+            flex: 0 0 40%;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .detail-value {
+            flex: 0 0 60%;
+        }
+        
+        /* Responsive Table */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 0 -16px;  /* Compensate for parent padding */
+            padding: 0 16px;  /* Add padding back */
+        }
+        
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 90%;
+                margin: 0 16px;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+            }
+            
+            .detail-label {
+                flex: none;
+                margin-bottom: var(--space-xs);
+            }
+            
+            .detail-value {
+                flex: none;
+            }
+        }
+
+        /* Cluster Radio Button Styles */
+        .cluster-radio {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .cluster-radio:checked {
+            accent-color: var(--accent-color);
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Details - {{ step.Name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12H4.5a2.5 2.5 0 0 1 0-5H9"></path>
+                    <path d="M15 12h4.5a2.5 2.5 0 0 0 0-5H15"></path>
+                    <line x1="9" y1="12" x2="15" y2="12"></line>
+                    <line x1="9" y1="17" x2="15" y2="17"></line>
+                    <line x1="12" y1="12" x2="12" y2="17"></line>
+                </svg>
+                EMR Job Manager
+            </div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item" id="dashboard-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    Dashboard
+                </li>
+                <li class="sidebar-menu-item" id="all-jobs-nav">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="12" x2="16" y2="12"></line>
+                        <line x1="16" y1="12" x2="14" y2="15"></line>
+                        <line x1="10" y1="15" x2="8" y2="12"></line>
+                        <line x1="2" y1="12" x2="8" y2="12"></line>
+                    </svg>
+                    All Jobs
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                Job Manager v1.0.0
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Header -->
+                <div class="main-header">
+                    <div>
+                        <div class="breadcrumb">
+                            <a href="{{ url_for('index') }}">Dashboard</a>
+                            <span class="breadcrumb-separator">/</span>
+                            <a href="{{ url_for('all_jobs', cluster_id=cluster_id) }}">All Jobs</a>
+                            <span class="breadcrumb-separator">/</span>
+                            <span>Job Details</span>
+                        </div>
+                        <h1 class="page-title">
+                            {{ step.Name }}
+                            <span class="text-muted">({{ step.Id }})</span>
+                        </h1>
+                    </div>
+                    <div>
+                        {% if step.Status.State in ['RUNNING', 'PENDING'] %}
+                        <form action="{{ url_for('stop_job') }}" method="post" class="stop-job-form">
+                            <input type="hidden" name="step_id" value="{{ step.Id }}">
+                            <input type="hidden" name="cluster_id" value="{{ cluster_id }}">
+                            <button type="submit" class="btn btn-danger">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                </svg>
+                                Stop Job
+                            </button>
+                        </form>
+                        {% else %}
+                        <a href="{{ url_for('download_logs', cluster_id=cluster_id, step_id=step.Id) }}" class="btn btn-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                            Download Logs
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Status Card -->
+                <div class="card mb-md">
+                    <div class="card-header">
+                        <h2 class="card-title">Job Status</h2>
+                        <span class="status-indicator 
+                            {% if step.Status.State == 'RUNNING' %}status-running
+                            {% elif step.Status.State == 'COMPLETED' %}status-completed
+                            {% elif step.Status.State == 'FAILED' %}status-failed
+                            {% elif step.Status.State == 'CANCELLED' %}status-warning
+                            {% else %}status-pending{% endif %}">
+                            {{ step.Status.State }}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <div class="stat-title">Cluster</div>
+                                <div class="stat-value">{{ cluster_details.Name }}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">Started</div>
+                                <div class="stat-value">
+                                    {{ step.Status.Timeline.StartDateTime.strftime('%Y-%m-%d %H:%M:%S') if step.Status.Timeline.StartDateTime else 'N/A' }}
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">Ended</div>
+                                <div class="stat-value">
+                                    {{ step.Status.Timeline.EndDateTime.strftime('%Y-%m-%d %H:%M:%S') if step.Status.Timeline.EndDateTime else 'N/A' }}
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-title">Duration</div>
+                                <div class="stat-value" id="job-duration">
+                                    {% if step.Status.Timeline.StartDateTime and step.Status.Timeline.EndDateTime %}
+                                        {% set duration = (step.Status.Timeline.EndDateTime - step.Status.Timeline.StartDateTime).total_seconds() %}
+                                        {% if duration < 60 %}
+                                            {{ duration|int }} seconds
+                                        {% elif duration < 3600 %}
+                                            {{ (duration / 60)|int }} minutes {{ (duration % 60)|int }} seconds
+                                        {% else %}
+                                            {{ (duration / 3600)|int }} hours {{ ((duration % 3600) / 60)|int }} minutes
+                                        {% endif %}
+                                    {% elif step.Status.Timeline.StartDateTime and step.Status.State == 'RUNNING' %}
+                                        <span class="running-timer" data-start="{{ step.Status.Timeline.StartDateTime.isoformat() }}">
+                                            Calculating...
+                                        </span>
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration Details -->
+                <div class="card mb-md">
+                    <div class="card-header">
+                        <h2 class="card-title">Job Configuration</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="detail-grid">
+                            {% if step_info %}
+                                {% for key, value in step_info.items() %}
+                                    {% if key != 'Arguments' %}
+                                        <div class="detail-row">
+                                            <div class="detail-label">{{ key }}</div>
+                                            <div class="detail-value">{{ value }}</div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if step_info.get('Arguments') %}
+                                    <div class="detail-row">
+                                        <div class="detail-label">Arguments</div>
+                                        <div class="detail-value">
+                                            <pre class="code-block">{% for arg in step_info.Arguments %}{{ arg }}
+                {% endfor %}</pre>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="detail-row">
+                                    <div class="detail-value">
+                                        <p class="text-muted">No configuration information available for this job.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Driver Logs -->
+                <div class="card">
+                    <div class="card-header d-flex justify-between align-center">
+                        <h2 class="card-title">Driver Logs</h2>
+                        {% if step.Status.State in ['RUNNING', 'PENDING'] %}
+                        <div class="d-flex align-center gap-sm">
+                            <div class="log-status">
+                                <span class="status-indicator status-running"></span>
+                                <span>Live Updates</span>
+                            </div>
+                            <button id="pause-logs-btn" class="btn btn-sm btn-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="6" y="4" width="4" height="16"></rect>
+                                    <rect x="14" y="4" width="4" height="16"></rect>
+                                </svg>
+                                Pause
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div id="logs-container" class="logs-container">
+                            <div class="logs-loading">
+                                <div class="loader"></div>
+                                <p>Loading logs...</p>
+                            </div>
+                            <pre id="logs-content" class="logs-content" style="display: none;"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navigation handlers
+            document.getElementById('dashboard-nav').addEventListener('click', function() {
+                window.location.href = "{{ url_for('index') }}";
+            });
+            
+            document.getElementById('all-jobs-nav').addEventListener('click', function() {
+                window.location.href = "{{ url_for('all_jobs', cluster_id=cluster_id) }}";
+            });
+            
+            // Stop job confirmation
+            const stopJobForm = document.querySelector('.stop-job-form');
+            if (stopJobForm) {
+                stopJobForm.addEventListener('submit', function(e) {
+                    if (!confirm('Are you sure you want to stop this job? This action cannot be undone.')) {
+                        e.preventDefault();
+                    }
+                });
+            }
+            
+            // Running timer
+            const runningTimer = document.querySelector('.running-timer');
+            if (runningTimer) {
+                const startTime = new Date(runningTimer.getAttribute('data-start'));
+                
+                function updateTimer() {
+                    const now = new Date();
+                    const durationMs = now - startTime;
+                    const seconds = Math.floor(durationMs / 1000);
+                    const minutes = Math.floor(seconds / 60);
+                    const hours = Math.floor(minutes / 60);
+                    
+                    const formattedTime = hours > 0 ? 
+                        `${hours}h ${minutes % 60}m ${seconds % 60}s` : 
+                        minutes > 0 ? 
+                            `${minutes}m ${seconds % 60}s` : 
+                            `${seconds}s`;
+                    
+                    runningTimer.textContent = formattedTime;
+                }
+                
+                updateTimer();
+                setInterval(updateTimer, 1000);
+            }
+            
+            // Logs handling
+            const logsContainer = document.getElementById('logs-container');
+            const logsLoading = logsContainer.querySelector('.logs-loading');
+            const logsContent = document.getElementById('logs-content');
+            const pauseLogsBtn = document.getElementById('pause-logs-btn');
+            
+            let logsUpdateInterval;
+            let isPaused = false;
+            
+            function fetchLogs() {
+                fetch('/api/logs/{{ cluster_id }}/{{ step.Id }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            logsContent.textContent = `Error loading logs: ${data.error}`;
+                        } else {
+                            logsContent.textContent = data.logs;
+                        }
+                        
+                        logsLoading.style.display = 'none';
+                        logsContent.style.display = 'block';
+                        
+                        // Auto-scroll to bottom unless paused
+                        if (!isPaused) {
+                            logsContent.scrollTop = logsContent.scrollHeight;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching logs:', error);
+                        logsContent.textContent = `Failed to load logs: ${error.message}`;
+                        logsLoading.style.display = 'none';
+                        logsContent.style.display = 'block';
+                    });
+            }
+            
+            // Initial logs fetch
+            fetchLogs();
+            
+            // Setup live updates for running jobs
+            if ('{{ is_running }}' === 'True') {
+                logsUpdateInterval = setInterval(fetchLogs, 5000);
+                
+                if (pauseLogsBtn) {
+                    pauseLogsBtn.addEventListener('click', function() {
+                        if (isPaused) {
+                            isPaused = false;
+                            this.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="6" y="4" width="4" height="16"></rect>
+                                    <rect x="14" y="4" width="4" height="16"></rect>
+                                </svg>
+                                Pause
+                            `;
+                            // Scroll to bottom and resume updates
+                            logsContent.scrollTop = logsContent.scrollHeight;
+                        } else {
+                            isPaused = true;
+                            this.innerHTML = `
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                                Resume
+                            `;
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+
+    <style>
+        /* Detail Grid */
+        .detail-grid {
+            display: grid;
+            gap: var(--space-md);
+        }
+        
+        .detail-row {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: var(--space-sm);
+        }
+        
+        .detail-label {
+            flex: 0 0 30%;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .detail-value {
+            flex: 0 0 70%;
+        }
+        
+        /* Code Block */
+        .code-block {
+            background-color: var(--background-darker);
+            border-radius: var(--card-border-radius);
+            padding: var(--space-sm);
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        
+        /* Logs Container */
+        .logs-container {
+            background-color: #1e1e1e;
+            border-radius: var(--card-border-radius);
+            height: 400px;
+            overflow-y: auto;
+            color: #f0f0f0;
+            font-family: monospace;
+            position: relative;
+        }
+        
+        .logs-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: var(--space-md);
+            color: var(--text-secondary);
+        }
+        
+        .logs-content {
+            padding: var(--space-md);
+            white-space: pre-wrap;
+            line-height: 1.5;
+            height: 100%;
+            overflow-y: auto;
+            margin: 0;
+        }
+        
+        /* Log Status */
+        .log-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+        
+        .log-status .status-indicator {
+            width: 10px;
+            height: 10px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        /* Stop Job Button */
+        .stop-job-form button {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+        
+        /* Button with Icon */
+        .btn svg {
+            margin-right: 4px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+            }
+            
+            .detail-label {
+                flex: none;
+                margin-bottom: var(--space-xs);
+            }
+            
+            .detail-value {
+                flex: none;
+            }
+        }
+    </style>
+</body>
+</html>

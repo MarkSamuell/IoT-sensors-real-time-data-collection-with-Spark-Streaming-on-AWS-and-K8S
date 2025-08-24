@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine-tools
+  namespace: dev
+spec:
+  restartPolicy: Never
+  tolerations:
+    - key: "node-type"
+      operator: "Equal"
+      value: "critical"
+      effect: "NoSchedule"
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: "node-type"
+                operator: "In"
+                values:
+                  - "critical"
+  containers:
+    - name: alpine-tools
+      image: alpine:latest
+      command:
+        - "sh"
+        - "-c"
+        - |
+          apk update && apk add --no-cache postgresql-client git curl python3 py3-pip nano
+          pip3 install --break-system-packages kafka-python
+          mkdir -p /app/simulators
+          echo "Scripts will be available at /app/simulators/"
+          ls -la /app/simulators/
+          tail -f /dev/null
+      envFrom:
+        - configMapRef:
+            name: shared-config
+      volumeMounts:
+        - name: k8s-simulators
+          mountPath: /app/simulators
+  volumes:
+    - name: k8s-simulators
+      configMap:
+        name: k8s-log-simulators
+        defaultMode: 0755
